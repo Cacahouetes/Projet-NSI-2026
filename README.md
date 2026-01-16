@@ -40,6 +40,13 @@ Permettre au joueur de gagner des **points**, utilisés comme monnaie pour ouvri
 ### Principe et fonctionnalités
 
 * À définir
+* Jeu en 2D en vagues
+* Le joueur doit éliminer tous les ennemis afin de passer à la vague suivante
+* Les ennemis deviennent de plus nombreux et plus forts 
+* Le joueur peut obtenir des power-ups et de nouvelles armes
+* Le joueur peut tirer et se battre sans armes (peut etre que j'ajouterai une grenade??)
+* Il peut aussi sauter, s'accroupir et courir (et tirer simultanément)
+
 
 ### Lien avec le Card Opening Simulator
 

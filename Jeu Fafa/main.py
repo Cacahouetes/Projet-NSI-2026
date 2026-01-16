@@ -6,14 +6,33 @@ pygame.init()
 win = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption("jeu nsiissininisissini")
 clock = pygame.time.Clock()
-
+tiles_img = [pygame.image.load("/home/pc/Documents/NSI/Projet-NSI-2026/Assets/jeu arcade/bg.png").convert_alpha(), pygame.image.load("/home/pc/Documents/NSI/Projet-NSI-2026/Assets/jeu arcade/bg.png").convert_alpha()
+]
 all_sprites = pygame.sprite.Group()
 player = Player((255,0,0), 50)
 all_sprites.add(player)
 running = True 
 dt = 0.1
+
+tiles = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+         ]
+
 while running:
 
+    #load tiles
+    for y in len(tiles):
+        for x in len(tiles[0]):
+            
     dt = clock.tick(60)  
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
