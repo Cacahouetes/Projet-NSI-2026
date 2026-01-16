@@ -182,9 +182,9 @@ Booster premium permettant d’obtenir des cartes de **toutes les catégories**.
 
 ### Slots (10 cartes)
 
-* Slots 1 à 5 : Commune (100 %)
+* Slots 1 à 6 : Commune (100 %)
 * Slots 6 à 8 : Rare (60 %) / Épique (40 %)
-* Slots 9 et 10 :
+* Slots 10 :
 
   * Épique : 40 %
   * Légendaire : 35 %
