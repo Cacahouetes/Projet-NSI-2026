@@ -183,13 +183,13 @@ Booster premium permettant d’obtenir des cartes de **toutes les catégories**.
 ### Slots (10 cartes)
 
 * Slots 1 à 5 : Commune (100 %)
-* Slots 6 à 8 : Rare (65 %) / Épique (35 %)
+* Slots 6 à 8 : Rare (60 %) / Épique (40 %)
 * Slots 9 et 10 :
 
   * Épique : 40 %
   * Légendaire : 35 %
-  * Mythique : 20 %
-  * Unique : 5 %
+  * Mythique : 24.5 %
+  * Unique : 0.5 %
 
 Le tirage GODPACK / DIVINE PACK est identique aux boosters de catégorie.
 
