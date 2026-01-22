@@ -1,6 +1,6 @@
 import random as rd
 from chest import ChestType
-from cards import Card, Rarity
+from card import Card, Rarity
 
 # Tirage du type de coffre
 def generate_chest_type():

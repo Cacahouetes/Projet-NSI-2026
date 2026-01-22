@@ -1,6 +1,6 @@
 import random as rd
 from collections import defaultdict
-from cards import Card, Rarity, RARITY_SELL_VALUE
+from card import Card, Rarity, RARITY_SELL_VALUE
 
 # Constante des fusions de cartes
 # Table de fusion

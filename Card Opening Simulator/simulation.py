@@ -1,5 +1,5 @@
 from generation import generate_normal_chest, generate_omni_chest
-from cards import Rarity, Category
+from card import Rarity, Category
 from collections import defaultdict
 
 class Stats:

@@ -1,6 +1,6 @@
 import random as rd
 import time
-from cards import Rarity, Card, RARITY_SELL_VALUE
+from card import Rarity, Card, RARITY_SELL_VALUE
 
 # Constante du shop
 SHOP_PRICE_MULTIPLIER = 2  # Prix augmenté de 100% par rapport au prix de base
@@ -60,5 +60,7 @@ class Shop:
             raise ValueError("Pas assez de pièces pour acheter cette carte")
         
         player.coins -= price
+        player.stats.coins_spent += price
+        player.stats.shop_cards_bought += 1
         player.inventory.add_card(card)
         self.shop_cards.pop(index)
