@@ -9,7 +9,6 @@ class Player:
         self.coins = coins
         self.inventory = Inventory()
         self.carddex = CardDex(total_cards_in_dex)
-        self.achievements = set()
         self.stats = PlayerStats()
         self.achievement_manager = AchievementManager()
 

@@ -6,6 +6,7 @@ class PlayerStats:
         # Global
         self.created_at = time.time()
         self.play_time = 0
+        self.achievements = set()
 
         # Coffres
         self.chests_opened = 0
@@ -40,6 +41,13 @@ class PlayerStats:
         # Progression
         self.max_coins_held = 0
         self.achievements_unlocked = 0
+
+        # Daily Rewards
+        self.daily_claims_total = 0
+        self.daily_current_streak = 0
+        self.daily_best_streak = 0
+        self.daily_streak_breaks = 0
+        self.last_daily_timestamp = 0
         
     def fusion_success_rate(self):
         if self.fusions_attempted == 0:
