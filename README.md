@@ -213,25 +213,139 @@ Après la génération complète d’un booster, un **tirage bonus indépendant*
 3. Tirage bonus de la Carte Divine
 4. Ajout éventuel d’une 11ᵉ carte
 
-## 11. Base de données (CardDex)
+## 11. Base de données (Card Opening Simulator)
 
-### Données des cartes
+PLAYERS (
+    <ins>player_id</ins> : **INT**,
+    username : **TEXT**,
+    created_at : **INT**
+)
 
-* ID
-* Nom
-* Catégorie
-* Rareté
-* Description
-* Image
-* Probabilité
+CARDS (
+    <ins>card_id</ins> : **INT**,
+    name : **TEXT**,
+    rarity : **TEXT**,
+    category : **TEXT**,
+    stat1 : **INT**,
+    stat2 : **INT**,
+    stat3 : **INT**,
+    description : **TEXT**,
+    autor : **TEXT**,
+    image_path : **TEXT**
+)
 
-### Données joueur
+PLAYER_CARDS (
+    <ins>#player_id</ins> : **INT**,
+    <ins>#card_id</ins> : **INT**,
+    quantity : **INT**
+)
 
-* Pseudo
-* Points
-* Cartes possédées
-* Boosters ouverts
-* Statistiques
+PLAYER_CARDDEX (
+    <ins>#player_id</ins> : **INT**,
+    <ins>#card_id</ins> : **INT**,
+    discovered_at : **INT**
+)
+
+PLAYER_STATS (
+    <ins>#player_id</ins> : **INT**, 
+    last_daily_timestamp : **INT**,
+    daily_current_streak : **INT**,
+    daily_best_streak : **INT**,
+    daily_streak_breaks : **INT**,
+    coins : **INT**,
+    coins_earned : **INT**,
+    coins_spent : **INT**,
+    max_coins_held : **INT**,
+    play_time_seconds : **INT**,
+)
+
+PLAYER_RARITY_STATS (
+    <ins>#player_id</ins> : **INT**,
+    <ins>rarity</ins> : **TEXT**,
+    obtained : **INT**,
+    sold : **INT**,
+    fused : **INT**
+)
+
+PLAYER_FUSIONS (
+    <ins>fusion_id</ins> : **INT**,
+    #player_id : **INT**,
+    timestamp : **INT**,
+    rarity_used : **TEXT**,
+    success : **BOOL**,
+    cost : **INT**,
+    card_obtained : **INT**
+)
+
+PLAYER_FUSIONS_CARDS (
+    <ins>#fusion_id</ins> : **INT**,
+    <ins>#card_id</ins> : **INT**,
+    quantity : **INT**
+)
+
+CHESTS (
+    <ins>chest_id</ins> : **INT**,
+    category : **TEXT**
+    cost : **INT**,
+    type : **TEXT**
+)
+
+CHEST_CARDS (
+    <ins>#chest_id</ins> : **INT**,
+    <ins>#card_id</ins> : **INT**,
+    quantity : **INT**
+)
+
+CHEST_OPENINGS (
+    <ins>opening_id</ins> : **INT**,
+    #player_id : **INT**,
+    #chest_id : **INT**,
+    opened_at : **INT**
+)
+
+ACHIEVEMENTS (
+    <ins>achievement_id</ins> : **INT**,
+    name : **TEXT**,
+    description : **TEXT**,
+    condition : **TEXT**
+)
+
+PLAYER_ACHIEVEMENTS (
+    <ins>#player_id</ins> : **INT**,
+    <ins>#achievement_id</ins> : **INT**,
+    unlocked_at : **INT**
+)
+
+DAILY_REWARDS (
+    <ins>day_index</ins> : **INT**,
+    coins : **INT**,
+    card_rarity : **TEXT**,
+    description : **TEXT**
+)
+
+DAILY_HISTORY (
+    <ins>daily_history_id</ins> : **INT**,
+    #player_id : **INT**,
+    day_index : **INT**,
+    coins : **INT**,
+    #card_id : **INT**,
+    claimed_at : **INT**
+)
+
+SHOP_CARDS (
+    <ins>shop_slot</ins> : **INT**,
+    #card_id : **INT**,
+    price : **INT**,
+    available_until : **INT**
+)
+
+SHOP_HISTORY (
+    <ins>shop_history_id</ins> : **INT**,
+    #player_id : **INT**,
+    #card_id : **INT**,
+    price : **INT**,
+    purchased_at : **INT**
+)
 
 ## 12. Statistiques
 
