@@ -5,7 +5,7 @@ def select():
     try:
         with connexion() as conn:
             cursor = conn.cursor()
-            sql = "SELECT * FROM "
+            sql = "SELECT * FROM " #Exemple
             cursor.execute(sql)
             results = cursor.fetchall()
             return results
