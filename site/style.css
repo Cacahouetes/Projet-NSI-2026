@@ -1,6 +1,99 @@
-body{
-    font-family: Arial, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
     margin: 0;
     padding: 0;
-    background-color: #ff1515;
+    box-sizing: border-box;
+    background: #f1f1f1;
+    font-family: 'Monsterrat' , sans-serif;
+ }
+
+.header-logo {
+    display: inline-block;
+    width: 90%;
+    padding: 10px 30px;
+}
+
+.header-logo a {
+    text-decoration: none;
+    color: black;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav {
+    display: inline-block;
+    width: 90%;
+}
+
+.nav-items {
+    display: inline-block;
+    width: calc(70% - 100px);
+    vertical-align: middle;
+    text-align: center;
+}
+
+.nav-item {
+    display: inline-block;
+    margin: 0px 10px;
+}
+
+.nav-item a {
+    text-decoration: none;
+    color: black;
+    font-weight: 600;
+
+}
+
+.nav-search {
+    display: inline-block;
+    width: 30%;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.nav-search_elt {
+    background-color: #c5c5c5;
+    width: 50%;
+    padding: 5px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+    align-items: center;
+    overflow: hidden;
+}
+
+.search-input {
+    background-color: #c5c5c5;
+    border: none;
+    flex-basis: 60%;
+    outline: none;
+}
+
+.nav-search_elt i {
+    flex-basis: 40%;
+}
+
+.main-title {
+    padding: 0px 20px;
+    color: black;
+}
+
+.secondary-title {
+    color: red;
+}
+
+.main-section {
+    display: grid;
+    grid-template-rows: repeat(3, 450px);
+    grid-gap: 20px;
+    width: 100%;
+    margin: auto;
+    padding: 10px 0px;
+}
+
+.article-text {
+    flex-basis: 100%;
+    margin: 6px;
 }
