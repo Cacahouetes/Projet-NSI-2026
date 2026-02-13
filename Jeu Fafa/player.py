@@ -7,17 +7,16 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface([size, size*1.5])
         self.image.fill(clr)
         
-
         self.rect = self.image.get_rect()
-        self.rect.x = 100
-        self.x = 100
-        self.y = 0
+        self.posX = 100
+        self.posY = 0
         self.velocity = [0,0]
         self.jumping = False
         self.SPEED = 0.6
         self.tick = 0
 
-    def update(self, delta, tileGroup):
+
+    def update(self, delta, tileGroup, scroll):
         self.tick += 1
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -29,16 +28,25 @@ class Player(pygame.sprite.Sprite):
             self.velocity[1] = 1
             self.jumping = True
         
+        self.movewCollision(tileGroup, scroll, delta)
+        
+
+    def movewCollision(self, tileGroup, scroll, delta):
+        self.rect.x = self.posX - scroll.x
+        self.rect.y = self.posY - scroll.y
+
         self.velocity[0] *= 0.7 
         self.velocity[1] -= 0.05  
         
-        #collision
         self.rect.x += self.velocity[0] * delta
         self.moveX(tileGroup)
+
         self.rect.y -= self.velocity[1] * delta
         self.moveY(tileGroup)
 
-                
+        self.posX = self.rect.x + scroll.x
+        self.posY = self.rect.y + scroll.y
+
     def moveX(self, tileGroup):
         hit_list = pygame.sprite.spritecollide(self, tileGroup, False)
         for hit_tile in hit_list:
@@ -49,7 +57,7 @@ class Player(pygame.sprite.Sprite):
                 elif self.velocity[0] < 0: #gauche
                     self.rect.left = hit_tile.rect.right #- self.rect.width
                 self.velocity[0] = 0
-    
+  
     def moveY(self, tileGroup):
         hit_list = pygame.sprite.spritecollide(self, tileGroup, False)
         for hit_tile in hit_list:

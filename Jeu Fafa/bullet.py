@@ -9,11 +9,17 @@ class Bullet(pygame.sprite.Sprite):
 
         self.dir = bDir
         self.rect = self.image.get_rect()
-        self.vPos = [posx, posy]
+        self.vPos = [int(posx), int(posy)]
 
-    def update(self, delta):
+    def update(self, delta, tile_sprites):
+    
         self.vPos[0] += 3 * delta * self.dir
         self.rect.centerx = self.vPos[0]
         self.rect.centery = self.vPos[1]
+
+        for hit_tile in pygame.sprite.spritecollide(self, tile_sprites, False):
+            if hit_tile.tileID > 0: 
+                self.kill()
+                return
         #if abs(self.vPos[0]) > 10000:
             
