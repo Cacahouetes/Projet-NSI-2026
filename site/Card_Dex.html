@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Dex</title>
+    <link rel="stylesheet" href="style_2.css">
+        <link 
+      rel= "stylesheet"
+      href= "https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css" 
+    />
+</head>
+
+<body>
+
+    <!-- Haut de la page -->
+    <header >
+        <div class="header-logo">
+            <a href="/">Card Opening Simulator</a>
+        </div>
+
+        <nav class="nav">
+            <ul class="nav-items">
+                <li class="nav-item">
+                    <a href="Acceuil.html">Acceuil</a></li>
+                <li class="nav-item">
+                    <a href="Card_Dex.html">Card Dex</a></li>
+            </ul>
+        </nav>
+    </header>
+    <!-- Fin du haut de la page -->
+
+    <div class="container">
+        <h1>Card Dex</h1>
+        
+        <div class="search-box">
+            <input 
+                type="text" 
+                id="searchInput" 
+                placeholder="Rechercher une carte..."
+            >
+        </div>
+        
+        <div class="cards-grid" id="cardsGrid">
+            <div class="no-results">Chargement des cartes...</div>
+        </div>
+    </div>
+        </header>
+    
+        <main>
+            <!-- Les cartes seront affichées ici -->
+        </main>
+
+    <script>
+        let allCards = [];
+
+        // Charger les données de la base de données
+        async function loadCards() {
+            try {
+                const response = await fetch('/BDD/database.db'); // Adapter l'URL selon le serveur
+                allCards = await response.json();
+                displayCards(allCards);
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('cardsGrid').innerHTML = 
+                    '<div class="no-results">Erreur de chargement des cartes</div>';
+            }
+        }
+
+        // Afficher les cartes
+        function displayCards(cards) {
+            const grid = document.getElementById('cardsGrid');
+            
+            if (cards.length === 0) {
+                grid.innerHTML = '<div class="no-results">Aucune carte trouvée</div>';
+                return;
+            }
+            
+            grid.innerHTML = cards.map(card => `
+                <div class="card">
+                    <img src="${card.image || 'placeholder.png'}" alt="${card.name}" class="card-image">
+                    <div class="card-info">
+                        <div class="card-name">${card.name}</div>
+                        <div class="card-details">${card.type || ''}</div>
+                        <div class="card-details">${card.stats || ''}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Rechercher les cartes
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allCards.filter(card => 
+                card.name.toLowerCase().includes(query) ||
+                (card.type && card.type.toLowerCase().includes(query))
+            );
+            displayCards(filtered);
+        });
+
+        // Charger au démarrage
+        loadCards();
+    </script>
+</body>
+</html>
