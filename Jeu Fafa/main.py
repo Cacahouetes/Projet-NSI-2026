@@ -6,7 +6,7 @@ pygame.init()
 win = pygame.display.set_mode((1280, 736))
 pygame.display.set_caption("jeu nsiissininisissini")
 clock = pygame.time.Clock()
-tiles_img = [pygame.image.load("/home/pc/Documents/NSI/Projet-NSI-2026/Assets/jeu arcade/fg.png").convert_alpha(), pygame.image.load("/home/pc/Documents/NSI/Projet-NSI-2026/Assets/jeu arcade/bg.png").convert_alpha()
+tiles_img = [pygame.image.load("Assets/jeu arcade/fg.png").convert_alpha(), pygame.image.load("Assets/jeu arcade/bg.png").convert_alpha()
 ]
 all_sprites = pygame.sprite.Group()
 tile_sprites = pygame.sprite.Group()
