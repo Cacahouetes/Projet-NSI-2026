@@ -1,6 +1,12 @@
 import random as rd
 from chest import ChestType
-from card import Card, Rarity
+from card import Rarity
+from database import CardRepository
+
+REPOSITORY = CardRepository()
+
+def draw_card(rarity, category=None):
+    return REPOSITORY.get_random_card(rarity, category)
 
 # Tirage du type de coffre
 def generate_chest_type():
@@ -18,7 +24,7 @@ def sort_cards(cards):
 
 # Coffre Divin
 def generate_divine_chest():
-    return [Card(Rarity.DIVINE) for _ in range(10)]
+    return [draw_card(Rarity.DIVINE) for _ in range(10)]
 
 # Coffre de Dieu
 def generate_god_chest(category):
@@ -27,11 +33,11 @@ def generate_god_chest(category):
     for _ in range(10):
         roll = rd.random()
         if roll < 0.01:
-            cards.append(Card(Rarity.UNIQUE, category))
+            cards.append(draw_card(Rarity.UNIQUE, category))
         elif roll < 0.31:
-            cards.append(Card(Rarity.MYTHIC, category))
+            cards.append(draw_card(Rarity.MYTHIQUE, category))
         else:
-            cards.append(Card(Rarity.LEGENDARY, category))
+            cards.append(draw_card(Rarity.LÉGENDAIRE, category))
     return sort_cards(cards)
 
 # Coffre Omni dieu 
@@ -41,11 +47,11 @@ def generate_god_omni_chest():
     for _ in range(10):
         roll = rd.random()
         if roll < 0.05:
-            cards.append(Card(Rarity.UNIQUE))
+            cards.append(draw_card(Rarity.UNIQUE))
         elif roll < 0.5:
-            cards.append(Card(Rarity.MYTHIC))
+            cards.append(draw_card(Rarity.MYTHIQUE))
         else:
-            cards.append(Card(Rarity.LEGENDARY))
+            cards.append(draw_card(Rarity.LÉGENDAIRE))
     return sort_cards(cards)
 
 # Coffre Normal
@@ -54,28 +60,28 @@ def generate_cards_normal_chest(category):
     cards = []
     # 6 premiers slots: 100% Communes
     for _ in range(6):
-        cards.append(Card(Rarity.COMMON, category))
+        cards.append(draw_card(Rarity.COMMUNE, category))
 
     # 3 slots suivants: 75% Rares, 25% Épiques
     for _ in range(3):
         roll = rd.random()
         if roll < 0.25:
-            cards.append(Card(Rarity.EPIC, category))
+            cards.append(draw_card(Rarity.ÉPIQUE, category))
         else:
-            cards.append(Card(Rarity.RARE, category))
+            cards.append(draw_card(Rarity.RARE, category))
 
     # Dernier slot: 55% Rare, 30% Épique, 10% Légendaire, 4,9% Mythique, 0,1% Unique
     roll = rd.random()
     if roll < 0.001:
-        cards.append(Card(Rarity.UNIQUE, category))
+        cards.append(draw_card(Rarity.UNIQUE, category))
     elif roll < 0.05:
-        cards.append(Card(Rarity.MYTHIC, category))
+        cards.append(draw_card(Rarity.MYTHIQUE, category))
     elif roll < 0.15:
-        cards.append(Card(Rarity.LEGENDARY, category))
+        cards.append(draw_card(Rarity.LÉGENDAIRE, category))
     elif roll < 0.45:
-        cards.append(Card(Rarity.EPIC, category))
+        cards.append(draw_card(Rarity.ÉPIQUE, category))
     else:
-        cards.append(Card(Rarity.RARE, category))
+        cards.append(draw_card(Rarity.RARE, category))
 
     return sort_cards(cards)
 
@@ -84,33 +90,33 @@ def generate_cards_omni_chest():
     cards = []
     # 6 premiers slots: 100% Communes
     for _ in range(5):
-        cards.append(Card(Rarity.COMMON))
+        cards.append(draw_card(Rarity.COMMUNE))
 
     # 3 slots suivants: 60% Rares, 40% Épiques
     for _ in range(3):
         roll = rd.random()
         if roll < 0.40:
-            cards.append(Card(Rarity.EPIC))
+            cards.append(draw_card(Rarity.ÉPIQUE))
         else:
-            cards.append(Card(Rarity.RARE))
+            cards.append(draw_card(Rarity.RARE))
 
     # 2 dernier slots: 40% Épique, 35% Légendaire, 24.5% Mythique, 0,5% Unique
     for _ in range(2):
         roll = rd.random()
         if roll < 0.005:
-            cards.append(Card(Rarity.UNIQUE))
+            cards.append(draw_card(Rarity.UNIQUE))
         elif roll < 0.25:
-            cards.append(Card(Rarity.MYTHIC))
+            cards.append(draw_card(Rarity.MYTHIQUE))
         elif roll < 0.60:
-            cards.append(Card(Rarity.LEGENDARY))
+            cards.append(draw_card(Rarity.LÉGENDAIRE))
         else:
-            cards.append(Card(Rarity.EPIC))
+            cards.append(draw_card(Rarity.ÉPIQUE))
     return sort_cards(cards)
 
 def bonus_divine_card(cards):
     roll = rd.randint(1, 30000)
     if roll == 67:
-        cards.append(Card(Rarity.DIVINE))
+        cards.append(draw_card(Rarity.DIVINE))
     return cards
 
 def generate_normal_chest(category):
