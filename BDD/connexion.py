@@ -1,7 +1,9 @@
 import sqlite3
+import os
+
+DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
 
 def connexion():
-    return sqlite3.connect('projet_NSI.db') #peut changer base de donée au besoin
-
-
-
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
