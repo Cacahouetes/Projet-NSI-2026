@@ -1,37 +1,33 @@
 import pygame
 from math import ceil
-class Player(pygame.sprite.Sprite):
-    def __init__(self, clr, size, posx, posy):
+class Entity(pygame.sprite.Sprite):
+    def __init__(self, clr, size, posx, posy, speed):
         pygame.sprite.Sprite.__init__(self)
-
-        self.type = 1 #PLAYER
+        self.type = 0 #0 == FOLLOW
+        self.clr = clr
         self.image = pygame.Surface([size, size*1.5])
-        self.image.fill(clr)
+        self.image.fill(self.clr)
         
         self.rect = self.image.get_rect()
         self.posX = posx
         self.posY = posy
         self.velocity = [0,0]
-        self.jumping = False
-        self.SPEED = 0.6
-        self.tick = 0
+        self.SPEED = speed
 
+        self.health = 1.00
+
+        self.tick = 0
+        self.r = 255
 
     def update(self, delta, tileGroup, scroll):
         self.tick += 1
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            self.velocity[0] = -self.SPEED
-        elif keys[pygame.K_RIGHT]:
-            self.velocity[0] = self.SPEED
-        
-        if keys[pygame.K_UP] and not self.jumping:
-            self.velocity[1] = 1
-            self.jumping = True
-        
-        self.movewCollision(tileGroup, scroll, delta)
-        
+        self.r += delta
+        if self.r > 255:
+            self.r = 255
 
+        self.image.fill((self.r, 255, 255, 255))
+        self.movewCollision(tileGroup, scroll, delta)
+    
     def movewCollision(self, tileGroup, scroll, delta):
         if self.posY > 1000:
             self.posY = -200
@@ -75,6 +71,9 @@ class Player(pygame.sprite.Sprite):
 
                 self.velocity[1] = 0
 
-        #self.rect.x = self.x
-        #self.rect.y = self.y 
+    def takedmg(self, damageNum):
+        self.health -= damageNum
 
+        self.r = 0
+
+        

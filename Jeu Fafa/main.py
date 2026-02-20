@@ -1,5 +1,6 @@
 import pygame 
 from player import Player
+from entity import Entity
 from bullet import Bullet
 from tile import Tile
 pygame.init()
@@ -11,11 +12,8 @@ tiles_img = [pygame.image.load("/home/pc/Documents/NSI/Projet-NSI-2026/Assets/je
 all_sprites = pygame.sprite.Group()
 tile_sprites = pygame.sprite.Group()
 
-player = Player((255,0,0), 50)
+player = Player((255,0,0), 50, 300, 50)
 all_sprites.add(player)
-
-playertwo = Player((0,100,150), 30)
-all_sprites.add(playertwo)
 
 running = True 
 dt = 0.1
@@ -50,12 +48,7 @@ tiles = [[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 tileNumX = len(tiles[0])
 tileNumY = len(tiles)
 
-camX = 0
-camY = 0
-"""
-player:
--move x 
-"""
+
 for y in range(len(tiles)):
         for x in range(len(tiles[0])):
             newTile = Tile()
@@ -67,26 +60,47 @@ for y in range(len(tiles)):
             newTile.image = tiles_img[newTile.tileID].convert()
             tile_sprites.add(newTile)
 
+#spawn entities a des positions aléatoires
+for xpos in [100, 250, 500, 444, 602]:
+    newent = Entity((xpos%255, 200,200), 20, xpos, 0, (xpos%100)/100)
+    all_sprites.add(newent)
+
 scroll = pygame.math.Vector2(0,0)
 
 while running:
-    
+    isHitPressed = False
+
     dt = clock.tick(60) 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                isHitPressed = True
+
             if event.key == pygame.K_o:
                 ddir = 1 
                 if player.velocity[0] > 0:
                     ddir = 1 
                 else:
                     ddir = -1 
-
+                
                 all_sprites.add(Bullet(player.rect.centerx, player.rect.centery, ddir))
     keys = pygame.key.get_pressed()
 
     win.fill((0,0,0))    
+    #update sprites
+    for spr in all_sprites: 
+        if spr.type == 0:
+            if spr.posX - player.posX < 0:
+                spr.velocity[0] = spr.SPEED
+            else:
+                spr.velocity[0] = -spr.SPEED
+        
+    for coll in pygame.sprite.spritecollide(player, all_sprites, False):  
+        if isHitPressed and coll != player:
+            coll.takedmg(0.1)
+    
     scroll.x += (player.posX - scroll.x - 1280//2)//10
     scroll.y += (player.posY - scroll.y - 786//2)//5
 
@@ -98,8 +112,6 @@ while running:
     all_sprites.draw(win)
 
     pygame.display.flip()
-
-
 pygame.quit()
 
 """
