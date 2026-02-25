@@ -1,5 +1,6 @@
 import pygame
 from math import ceil
+from enum import Enum
 class Entity(pygame.sprite.Sprite):
     def __init__(self, clr, size, posx, posy, speed):
         pygame.sprite.Sprite.__init__(self)
@@ -19,11 +20,25 @@ class Entity(pygame.sprite.Sprite):
         self.tick = 0
         self.r = 255
 
-    def update(self, delta, tileGroup, scroll):
-        self.tick += 1
-        self.r += delta
-        if self.r > 255:
-            self.r = 255
+        self.states = Enum('state', [('FOLLOW', 0), ('DEAD', 1)])
+        self.state = self.states['FOLLOW']
+
+    def update(self, delta, tileGroup, scroll, player):
+        match self.state:
+            case self.states.FOLLOW:
+                if self.posX - player.posX < 0:
+                    self.velocity[0] = self.SPEED
+                else:
+                    self.velocity[0] = -self.SPEED 
+
+                self.tick += 1
+                self.r += delta
+                if self.r > 255:
+                    self.r = 255
+            case self.states.DEAD:
+
+                self.velocity[0] = 0
+                self.velocity[1] = 0
 
         self.image.fill((self.r, 255, 255, 255))
         self.movewCollision(tileGroup, scroll, delta)
@@ -75,5 +90,7 @@ class Entity(pygame.sprite.Sprite):
         self.health -= damageNum
 
         self.r = 0
+        if self.health < 0:
+            self.state = self.states['DEAD']
 
-        
+    

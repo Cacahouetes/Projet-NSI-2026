@@ -21,11 +21,17 @@ class Gun():
 
         if abs(angleDeg) > 90:
             rotated_gun = pygame.transform.flip(rotated_gun, False, True)
-
         rotated_gun = pygame.transform.rotate(rotated_gun, angleDeg + self.angleOffset * (-1 if abs(angleDeg) > 90 else 1))
         
         rot_gun_rect = rotated_gun.get_rect()
-        win.blit(rotated_gun, (player.rect.centerx - rotated_gun.get_width()/2, player.rect.centery - rotated_gun.get_height()/2))
+
+        offsetx = 0
+        if abs(angleDeg) > 90:
+            offsetx = -24
+        else:
+            offsetx = 24
+
+        win.blit(rotated_gun, (player.rect.centerx - rotated_gun.get_width()/2 + offsetx, player.rect.centery - rotated_gun.get_height()/2))
         self.tipx = player.rect.centerx + 1*cos(angleDeg)
         self.tipy = player.rect.centery + 1*sin(angleDeg)
         

@@ -13,15 +13,15 @@ clock = pygame.time.Clock()
 tiles_img = [pygame.image.load("Assets/jeu arcade/fg.png").convert_alpha(), pygame.image.load("Assets/jeu arcade/bg.png").convert_alpha()
 ]
 
-entity_sprites = pygame.sprite.Group()
 ennemy_sprites = pygame.sprite.Group()
-
 tile_sprites = pygame.sprite.Group()
 bullet_sprites = pygame.sprite.Group()
+ent_draw_sprites = pygame.sprite.Group()
 
-player = Player((255,0,0), 50, 300, 50)
+player = Player(300, 50)
+ent_draw_sprites.add(player)
+
 gun = Gun()
-entity_sprites.add(player)
 
 running = True 
 dt = 0.1
@@ -46,10 +46,10 @@ tiles = [[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
          #[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1]
          ]
@@ -70,8 +70,9 @@ for y in range(len(tiles)):
 #spawn entities a des positions aléatoires
 for xpos in [100, 250, 500, 444, 602]:
     newent = Entity((xpos%255, 200,200), 20, xpos, 0, (xpos%100)/100)
+    newent.type = 0
     ennemy_sprites.add(newent)
-    entity_sprites.add(newent)
+    ent_draw_sprites.add(newent)
 
 scroll = pygame.math.Vector2(0,0)
 
@@ -86,7 +87,7 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             
-            bullet = Bullet(gun.tipx + scroll.x, gun.tipy + scroll.y , msPlDir)
+            bullet = Bullet(gun.tipx + scroll.x, gun.tipy + scroll.y , player.msPlDir)
             bullet_sprites.add(bullet)
             gun.shootFlag = True
 
@@ -101,17 +102,12 @@ while running:
     tile_sprites.update(scroll)
 
     #update sprites
-    for spr in entity_sprites: 
-        if spr.type == 0:
-            if spr.posX - player.posX < 0:
-                spr.velocity[0] = spr.SPEED
-            else:
-                spr.velocity[0] = -spr.SPEED 
-    for coll in pygame.sprite.spritecollide(player, entity_sprites, False):  
+    ennemy_sprites.update(dt, tile_sprites, scroll, player)
+    for coll in pygame.sprite.spritecollide(player, ennemy_sprites, False):  
         if isHitPressed and coll != player:
             coll.takedmg(0.1)
     
-    entity_sprites.update(dt, tile_sprites, scroll)
+    player.update(dt, tile_sprites, scroll)
     
     #update bullets 
     for bul in bullet_sprites:
@@ -128,16 +124,13 @@ while running:
                 break
 
     tile_sprites.draw(win)
+    ent_draw_sprites.draw(win)
     bullet_sprites.draw(win)
-    entity_sprites.draw(win)
 
-    #get angle of player mouse line
-    lx = pygame.mouse.get_pos()[0] - player.rect.centerx 
-    ly = player.rect.centery -  pygame.mouse.get_pos()[1]
-    msPlDir = math.atan2(ly, lx)
-
+    
+    
     #dessiner le pistolet
-    gun.update(win, player, msPlDir*180/3.14159265)
+    gun.update(win, player, player.msPlDir*180/3.14159265)
 
     pygame.display.flip()
 pygame.quit()

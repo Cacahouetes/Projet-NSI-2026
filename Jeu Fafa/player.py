@@ -1,13 +1,32 @@
 import pygame
-from math import ceil
+from math import ceil, atan2, cos
 class Player(pygame.sprite.Sprite):
-    def __init__(self, clr, size, posx, posy):
+    def loadimg(self, path):
+        return pygame.image.load(path).convert_alpha()
+    def __init__(self, posx, posy):
         pygame.sprite.Sprite.__init__(self)
 
         self.type = 1 #PLAYER
-        self.image = pygame.Surface([size, size*1.5])
-        self.image.fill(clr)
+
+        self.animdict = {
+            "idle" : ["idle/playerIdle1.png", "idle/playerIdle2.png"],
+            "walk" : ["walk/playerWalk2.png", "walk/playerWalk1.png"],
+            "jump" : ["jump/playerJump1.png", "jump/playerJump2.png", "jump/playerJump3.png"]
+        }
+        #charger les animations
+        self.images = {}
+        self.images_orig = {}
+        for anim in self.animdict:
+            self.images[anim] = []
+            self.images_orig[anim] = []
+            for i in range(len(self.animdict[anim])):
+                self.images[anim].append(self.loadimg("Assets/jeu arcade/playerspr/" + self.animdict[anim][i]))
+                self.images[anim][i] = pygame.transform.scale2x(self.images[anim][i])
+                self.images_orig[anim].append(self.images[anim][i])
         
+        self.curranim = "idle" #remplacer ça par un enum?
+        self.animspd = 10
+        self.image = self.images["idle"][0]
         self.rect = self.image.get_rect()
         self.posX = posx
         self.posY = posy
@@ -16,12 +35,14 @@ class Player(pygame.sprite.Sprite):
         self.SPEED = 0.6
         self.tick = 0
 
+        self.msPlDir = 0
 
     def update(self, delta, tileGroup, scroll):
         self.tick += 1
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.velocity[0] = -self.SPEED
+            
         elif keys[pygame.K_RIGHT]:
             self.velocity[0] = self.SPEED
         
@@ -29,8 +50,37 @@ class Player(pygame.sprite.Sprite):
             self.velocity[1] = 1
             self.jumping = True
         
-        self.movewCollision(tileGroup, scroll, delta)
+
         
+        self.movewCollision(tileGroup, scroll, delta)
+        self.updMousePos()
+        self.animations()
+
+    def animations(self):
+        if self.jumping:
+            if self.curranim != "jump":
+                self.curranim = "jump"
+                self.tick = 0
+                self.animspd = 11
+        else:   
+            if abs(self.velocity[0]) > 0.1 and self.curranim != "walk":
+                self.curranim = "walk"
+                self.tick = 0
+                self.animspd = 10
+            elif abs(self.velocity[0]) < 0.1 and self.curranim != "idle":
+                self.curranim = "idle"
+                self.tick = 0
+                self.animspd = 5
+
+        if self.curranim == "jump" and int(self.tick / 60 * self.animspd) >= len(self.images[self.curranim]): #eviter l'animation en boucle pour le saut
+            animIdx = len(self.images[self.curranim]) -1
+        else:
+            animIdx = int(self.tick / 60 * self.animspd) % len(self.images[self.curranim])
+
+        if cos(self.msPlDir) < 0:
+            self.image = pygame.transform.flip(self.images[self.curranim][animIdx], True, False)
+        else:
+            self.image = self.images_orig[self.curranim][animIdx]
 
     def movewCollision(self, tileGroup, scroll, delta):
         if self.posY > 1000:
@@ -78,3 +128,8 @@ class Player(pygame.sprite.Sprite):
         #self.rect.x = self.x
         #self.rect.y = self.y 
 
+    def updMousePos(self):
+        #get angle of player mouse line
+        lx = pygame.mouse.get_pos()[0] - self.rect.centerx 
+        ly = self.rect.centery -  pygame.mouse.get_pos()[1]
+        self.msPlDir = atan2(ly, lx)
