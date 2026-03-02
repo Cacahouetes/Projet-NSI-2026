@@ -3,15 +3,20 @@ from math import ceil, atan2, cos
 class Player(pygame.sprite.Sprite):
     def loadimg(self, path):
         return pygame.image.load(path).convert_alpha()
-    def __init__(self, posx, posy):
+    
+    
+    def __init__(self, posx, posy, evts):
         pygame.sprite.Sprite.__init__(self)
 
+        self.eventman = evts
         self.type = 1 #PLAYER
-
+        self.health = 1.00
+        self.isDead = False        
         self.animdict = {
             "idle" : ["idle/playerIdle1.png", "idle/playerIdle2.png"],
             "walk" : ["walk/playerWalk2.png", "walk/playerWalk1.png"],
-            "jump" : ["jump/playerJump1.png", "jump/playerJump2.png", "jump/playerJump3.png"]
+            "jump" : ["jump/playerJump1.png", "jump/playerJump2.png", "jump/playerJump3.png"],
+            "damage": ["damage/playerDamage1.png"]
         }
         #charger les animations
         self.images = {}
@@ -57,11 +62,18 @@ class Player(pygame.sprite.Sprite):
         self.animations()
 
     def animations(self):
+        
+        #if self.curranim == "damage":
+        #    self.curranim = "idle"
+
+        if self.eventman.currEvts[self.eventman.evts["PLAYER_TAKE_DAMAGE"].value]:
+            self.curranim = "damage"
+
         if self.jumping:
             if self.curranim != "jump":
                 self.curranim = "jump"
                 self.tick = 0
-                self.animspd = 11
+                self.animspd = 6
         else:   
             if abs(self.velocity[0]) > 0.1 and self.curranim != "walk":
                 self.curranim = "walk"
@@ -72,11 +84,11 @@ class Player(pygame.sprite.Sprite):
                 self.tick = 0
                 self.animspd = 5
 
+
         if self.curranim == "jump" and int(self.tick / 60 * self.animspd) >= len(self.images[self.curranim]): #eviter l'animation en boucle pour le saut
             animIdx = len(self.images[self.curranim]) -1
         else:
             animIdx = int(self.tick / 60 * self.animspd) % len(self.images[self.curranim])
-
         if cos(self.msPlDir) < 0:
             self.image = pygame.transform.flip(self.images[self.curranim][animIdx], True, False)
         else:
@@ -133,3 +145,10 @@ class Player(pygame.sprite.Sprite):
         lx = pygame.mouse.get_pos()[0] - self.rect.centerx 
         ly = self.rect.centery -  pygame.mouse.get_pos()[1]
         self.msPlDir = atan2(ly, lx)
+
+    def takedmg(self, damageNum):
+        self.health -= damageNum
+
+        self.r = 0
+        if self.health < 0:
+            self.isDead = True

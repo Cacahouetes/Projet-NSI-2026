@@ -2,45 +2,68 @@ import pygame
 from math import ceil
 from enum import Enum
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, clr, size, posx, posy, speed):
+    def __init__(self, clr, size, posx, posy, events):
         pygame.sprite.Sprite.__init__(self)
+        
+        self.eventman = events
         self.type = 0 #0 == FOLLOW
         self.clr = clr
         self.image = pygame.Surface([size, size*1.5])
         self.image.fill(self.clr)
         
         self.rect = self.image.get_rect()
+        self.rect.width = 10
+
         self.posX = posx
         self.posY = posy
         self.velocity = [0,0]
-        self.SPEED = speed
-
+        self.SPEED = 0.3
         self.health = 1.00
 
         self.tick = 0
         self.r = 255
 
-        self.states = Enum('state', [('FOLLOW', 0), ('DEAD', 1)])
+        self.states = Enum('state', [('FOLLOW', 0), ('DEAD', 1), ('ATTACK', 1)])
         self.state = self.states['FOLLOW']
 
     def update(self, delta, tileGroup, scroll, player):
+        
         match self.state:
             case self.states.FOLLOW:
-                if self.posX - player.posX < 0:
+                self.tick += 1
+                plDist = self.rect.centerx - player.rect.centerx
+                
+                if self.rect.colliderect(player.rect):#abs(plDist) < 10:
+                    self.state = self.states['ATTACK']
+                    self.tick = 0
+
+                if abs(plDist) < 10:
+                    self.velocity[0] = 0
+                elif plDist < 0:
                     self.velocity[0] = self.SPEED
                 else:
                     self.velocity[0] = -self.SPEED 
 
-                self.tick += 1
+                
                 self.r += delta
                 if self.r > 255:
                     self.r = 255
+                
+            case self.states.ATTACK:
+                self.eventman.broadcast(self.eventman.evts['PLAYER_TAKE_DAMAGE'])
+                if self.tick == 0:
+                    player.takedmg(0.02)
+                elif self.tick > 80:
+                    self.state = self.states['FOLLOW']
+                self.tick += 1
             case self.states.DEAD:
 
                 self.velocity[0] = 0
                 self.velocity[1] = 0
-
-        self.image.fill((self.r, 255, 255, 255))
+                self.tick += 1
+        
+        
+        self.image.fill(self.clr)
         self.movewCollision(tileGroup, scroll, delta)
     
     def movewCollision(self, tileGroup, scroll, delta):
@@ -87,6 +110,7 @@ class Entity(pygame.sprite.Sprite):
                 self.velocity[1] = 0
 
     def takedmg(self, damageNum):
+        self.eventman.broadcast(self.eventman.evts['ENNEMY_TAKE_DAMAGE'])
         self.health -= damageNum
 
         self.r = 0
