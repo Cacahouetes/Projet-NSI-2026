@@ -1,39 +1,49 @@
 import pygame 
+import math
+
 from eventmanager import EventManager
+from soundmanager import SoundManager
+from screeneffects import ScreenEffects
 from player import Player
 from entity import Entity
 from bullet import Bullet
 from tile import Tile
 from gun import Gun
 
-import math
+
+deleteaftertick = 0
+running = True 
+dt = 0.1
+TILE_SIZE = 32 
+scroll = pygame.math.Vector2(0,0)
+
 pygame.init()
-pygame.mixer.init()
-
-
-
+#pygame.mixer.init()
 win = pygame.display.set_mode((1280, 736), vsync=1)
 pygame.display.set_caption("jeu nsiissininisissini")
 clock = pygame.time.Clock()
 tiles_img = [pygame.image.load("Assets/jeu arcade/fg.png").convert_alpha(), pygame.image.load("Assets/jeu arcade/bg.png").convert_alpha()
 ]
 
-gun = Gun()
-eventman = EventManager()
+
 
 ennemy_sprites = pygame.sprite.Group()
 tile_sprites = pygame.sprite.Group()
 bullet_sprites = pygame.sprite.Group()
 ent_draw_sprites = pygame.sprite.Group()
 
+gun = Gun()
+eventman = EventManager()
+soundman = SoundManager()
 player = Player(300, 50, eventman)
+scrfx = ScreenEffects()
+
 ent_draw_sprites.add(player)
 
+eventman.eventObjects.append(soundman)
+eventman.eventObjects.append(player)
+eventman.eventObjects.append(scrfx)
 
-deleteaftertick = 0
-running = True 
-dt = 0.1
-TILE_SIZE = 32 
 for i in range(len(tiles_img)):
     tiles_img[i] = pygame.transform.scale(tiles_img[i], (TILE_SIZE, TILE_SIZE))
 tiles = [[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], 
@@ -81,7 +91,7 @@ for xpos in [100, 250, 500, 444, 602]:
     ennemy_sprites.add(newent)
     ent_draw_sprites.add(newent)
 
-scroll = pygame.math.Vector2(0,0)
+
 
 while running:
     isHitPressed = False
@@ -97,6 +107,7 @@ while running:
             bullet = Bullet(gun.tipx + scroll.x, gun.tipy + scroll.y , player.msPlDir)
             bullet_sprites.add(bullet)
             gun.shootFlag = True
+            eventman.broadcast(eventman.evts['PLAYER_FIRE'])
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
@@ -139,6 +150,8 @@ while running:
                 bul.kill()
                 break
 
+    scrfx.update()
+
     tile_sprites.draw(win)
     ent_draw_sprites.draw(win)
     bullet_sprites.draw(win)
@@ -150,14 +163,12 @@ while running:
     #dessiner le pistolet
     gun.update(win, player, player.msPlDir*180/3.14159265)
     
-
+    win.blit(scrfx.image, scrfx.rect)
 
     pygame.display.flip()
 pygame.quit()
 
 """
-
-
 player avec des armes 
 doit eliminer les ennemis 
 

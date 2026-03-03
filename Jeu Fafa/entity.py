@@ -1,6 +1,8 @@
 import pygame
 from math import ceil
 from enum import Enum
+
+
 class Entity(pygame.sprite.Sprite):
     def __init__(self, clr, size, posx, posy, events):
         pygame.sprite.Sprite.__init__(self)
@@ -50,7 +52,7 @@ class Entity(pygame.sprite.Sprite):
                     self.r = 255
                 
             case self.states.ATTACK:
-                self.eventman.broadcast(self.eventman.evts['PLAYER_TAKE_DAMAGE'])
+                
                 if self.tick == 0:
                     player.takedmg(0.02)
                 elif self.tick > 80:
