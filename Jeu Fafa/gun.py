@@ -24,7 +24,7 @@ class Gun():
         rotated_gun = pygame.transform.rotate(rotated_gun, angleDeg + self.angleOffset * (-1 if abs(angleDeg) > 90 else 1))
         
         rot_gun_rect = rotated_gun.get_rect()
-
+        
         offsetx = 0
         if abs(angleDeg) > 90:
             offsetx = -24
