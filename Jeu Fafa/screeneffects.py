@@ -20,7 +20,7 @@ class ScreenEffects(pygame.sprite.Sprite):
         self.tick += 1
 
     def eventGet(self, event):
-        if event.value == 2: #player fire event
+        if event.value == 2000: #player fire event
             self.isPlDmgState = False
             self.tick = 10
         if event.value == 1: #player damage event

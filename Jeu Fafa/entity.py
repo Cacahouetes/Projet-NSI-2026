@@ -4,13 +4,13 @@ from enum import Enum
 
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, clr, size, posx, posy, events):
+    def __init__(self, clr, posx, posy, events):
         pygame.sprite.Sprite.__init__(self)
         
         self.eventman = events
         self.type = 0 #0 == FOLLOW
         self.clr = clr
-        self.image = pygame.Surface([size, size*1.5])
+        self.image = pygame.Surface([60, 90])
         self.image.fill(self.clr)
         
         self.rect = self.image.get_rect()
@@ -25,13 +25,14 @@ class Entity(pygame.sprite.Sprite):
         self.tick = 0
         self.r = 255
 
-        self.states = Enum('state', [('FOLLOW', 0), ('DEAD', 1), ('ATTACK', 1)])
+        self.states = Enum('state', [('FOLLOW', 0), ('DEAD', 1), ('ATTACK', 2), ('HURT', 3)])
         self.state = self.states['FOLLOW']
 
     def update(self, delta, tileGroup, scroll, player):
         
         match self.state:
             case self.states.FOLLOW:
+                self.clr = (255,255,255)
                 self.tick += 1
                 plDist = self.rect.centerx - player.rect.centerx
                 
@@ -52,18 +53,24 @@ class Entity(pygame.sprite.Sprite):
                     self.r = 255
                 
             case self.states.ATTACK:
-                
+                self.clr = (255,255,0)
                 if self.tick == 0:
                     player.takedmg(0.02)
                 elif self.tick > 80:
                     self.state = self.states['FOLLOW']
                 self.tick += 1
+            
             case self.states.DEAD:
-
+                self.clr = (0,0,0)
                 self.velocity[0] = 0
                 self.velocity[1] = 0
                 self.tick += 1
         
+            case self.states.HURT:
+                self.clr = (255,50,50)
+                self.tick += 1
+                if self.tick > 20:
+                    self.state = self.states['FOLLOW']
         
         self.image.fill(self.clr)
         self.movewCollision(tileGroup, scroll, delta)
@@ -97,7 +104,7 @@ class Entity(pygame.sprite.Sprite):
                 elif self.velocity[0] < 0: #gauche
                     self.rect.left = hit_tile.rect.right #- self.rect.width
                 self.velocity[0] = 0
-  
+
     def moveY(self, tileGroup):
         hit_list = pygame.sprite.spritecollide(self, tileGroup, False)
         for hit_tile in hit_list:
@@ -118,5 +125,7 @@ class Entity(pygame.sprite.Sprite):
         self.r = 0
         if self.health < 0:
             self.state = self.states['DEAD']
+        else:
+            self.state = self.states['HURT']
 
     

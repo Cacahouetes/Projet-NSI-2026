@@ -40,6 +40,8 @@ class Player(pygame.sprite.Sprite):
         self.SPEED = 0.6
         self.tick = 0
 
+        self.score = 0
+
         self.msPlDir = 0
 
     def update(self, delta, tileGroup, scroll):
@@ -154,3 +156,6 @@ class Player(pygame.sprite.Sprite):
     def eventGet(self, event):
         if event.value == self.eventman.evts['PLAYER_TAKE_DAMAGE'].value:
             self.curranim = "damage"
+        
+        if event.value == self.eventman.evts['PLAYER_GET_THING'].value:
+            self.score += 10

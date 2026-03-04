@@ -6,6 +6,7 @@ from soundmanager import SoundManager
 from screeneffects import ScreenEffects
 from player import Player
 from entity import Entity
+from collectible import Collectible
 from bullet import Bullet
 from tile import Tile
 from gun import Gun
@@ -30,7 +31,9 @@ tiles_img = [pygame.image.load("Assets/jeu arcade/fg.png").convert_alpha(), pyga
 ennemy_sprites = pygame.sprite.Group()
 tile_sprites = pygame.sprite.Group()
 bullet_sprites = pygame.sprite.Group()
+collectible_sprites = pygame.sprite.Group()
 ent_draw_sprites = pygame.sprite.Group()
+
 
 gun = Gun()
 eventman = EventManager()
@@ -86,12 +89,15 @@ for y in range(len(tiles)):
 
 #spawn entities a des positions aléatoires
 for xpos in [100, 250, 500, 444, 602]:
-    newent = Entity((xpos%255, 200,200), 20, xpos, 0, eventman)
+    newent = Entity((xpos%255, 200,200), xpos, 0, eventman)
     newent.type = 0
     ennemy_sprites.add(newent)
     ent_draw_sprites.add(newent)
 
-
+#spawn random collectible
+colc = Collectible(200,650)
+collectible_sprites.add(colc)
+#ent_draw_sprites.add(colc)
 
 while running:
     isHitPressed = False
@@ -135,6 +141,9 @@ while running:
     for coll in pygame.sprite.spritecollide(player, ennemy_sprites, False):  
         if isHitPressed and coll != player:
             coll.takedmg(0.1)
+    for colc_coll in pygame.sprite.spritecollide(player, collectible_sprites, False):
+        eventman.broadcast(eventman.evts['PLAYER_GET_THING'])
+        colc_coll.kill()
 
     #mettre à jour les bullets
     for bul in bullet_sprites:
@@ -151,9 +160,11 @@ while running:
                 break
 
     scrfx.update()
+    collectible_sprites.update(scroll, dt)
 
     tile_sprites.draw(win)
     ent_draw_sprites.draw(win)
+    collectible_sprites.draw(win)
     bullet_sprites.draw(win)
 
     #-----GUI-----
