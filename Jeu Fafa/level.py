@@ -19,7 +19,7 @@ class Level():
         self.bullet_sprites = pygame.sprite.Group()
         self.collectible_sprites = pygame.sprite.Group()
         self.ent_draw_sprites = pygame.sprite.Group()
-        self.waveN = 1
+        self.waveN = 0
         
         self.tiles = []
         self.tiles_img = [pygame.image.load("Assets/jeu arcade/fg.png").convert_alpha(), pygame.image.load("Assets/jeu arcade/bg.png").convert_alpha()]
@@ -157,9 +157,10 @@ class Level():
         self.collectible_sprites.update(self.scroll, dt)
 
     def NewWave(self):
-        for i in range(4*self.waveN):
-            self.newEntity(random.randrange(100,2500))
         self.waveN += 1
+        for i in range(4**self.waveN):
+            self.newEntity(random.randrange(100,2500))
+        
 
     def eventGet(self, event):
         if event.value == self.eventman.evts['NEW_WAVE'].value:

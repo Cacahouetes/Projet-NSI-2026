@@ -7,6 +7,9 @@ running = True
 dt = 0.1
 
 pygame.init()
+pygame.font.init()
+font = pygame.font.SysFont('Arial', 40)
+
 #pygame.mixer.init()
 win = pygame.display.set_mode((1280, 736), vsync=1)
 pygame.display.set_caption("jeu nsiissininisissini")
@@ -36,6 +39,8 @@ while running:
     level.update(dt)
     level.draw(win)
 
+    win.blit(font.render(f"Score: {level.player.score}", True, (222,222,222)), (600, 30))
+    win.blit(font.render(f"Wave: {level.waveN}", True, (222,222,222)), (300, 30))
     pygame.display.flip()
 pygame.quit()
 
