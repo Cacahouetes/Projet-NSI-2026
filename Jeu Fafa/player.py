@@ -40,6 +40,8 @@ class Player(pygame.sprite.Sprite):
         self.SPEED = 0.6
         self.tick = 0
 
+        self.score = 0
+
         self.msPlDir = 0
 
     def update(self, delta, tileGroup, scroll):
@@ -65,9 +67,6 @@ class Player(pygame.sprite.Sprite):
         
         #if self.curranim == "damage":
         #    self.curranim = "idle"
-
-        if self.eventman.currEvts[self.eventman.evts["PLAYER_TAKE_DAMAGE"].value]:
-            self.curranim = "damage"
 
         if self.jumping:
             if self.curranim != "jump":
@@ -147,8 +146,16 @@ class Player(pygame.sprite.Sprite):
         self.msPlDir = atan2(ly, lx)
 
     def takedmg(self, damageNum):
+        self.eventman.broadcast(self.eventman.evts['PLAYER_TAKE_DAMAGE'])
         self.health -= damageNum
 
         self.r = 0
         if self.health < 0:
             self.isDead = True
+
+    def eventGet(self, event):
+        if event.value == self.eventman.evts['PLAYER_TAKE_DAMAGE'].value:
+            self.curranim = "damage"
+        
+        if event.value == self.eventman.evts['PLAYER_GET_THING'].value:
+            self.score += 10
