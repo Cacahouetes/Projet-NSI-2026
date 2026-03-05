@@ -158,8 +158,9 @@ class Player(pygame.sprite.Sprite):
             self.curranim = "damage"
         
         if event.value == self.eventman.evts['PLAYER_FIRE'].value:
-            self.velocity[0] -= cos(self.msPlDir)/2
-            self.velocity[1] -= sin(self.msPlDir)/2
+            pass
+            #self.velocity[0] = -cos(self.msPlDir)/2
+            #self.velocity[1] -= sin(self.msPlDir)/2
         
         if event.value == self.eventman.evts['PLAYER_GET_THING'].value:
             self.score += 10

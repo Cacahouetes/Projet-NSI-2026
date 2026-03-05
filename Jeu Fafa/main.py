@@ -5,7 +5,6 @@ from level import Level
 
 running = True 
 dt = 0.1
-waveN = 0
 
 pygame.init()
 #pygame.mixer.init()
@@ -30,6 +29,9 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 pass
+    
+    if pygame.mouse.get_pressed():
+        level.NewBullet()
 
     level.update(dt)
     level.draw(win)

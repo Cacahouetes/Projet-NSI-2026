@@ -8,7 +8,7 @@ from collectible import Collectible
 from bullet import Bullet
 from tile import Tile
 from gun import Gun
-
+import random
 class Level():
 
     def __init__(self):
@@ -19,7 +19,8 @@ class Level():
         self.bullet_sprites = pygame.sprite.Group()
         self.collectible_sprites = pygame.sprite.Group()
         self.ent_draw_sprites = pygame.sprite.Group()
-
+        self.waveN = 1
+        
         self.tiles = []
         self.tiles_img = [pygame.image.load("Assets/jeu arcade/fg.png").convert_alpha(), pygame.image.load("Assets/jeu arcade/bg.png").convert_alpha()]
 
@@ -33,20 +34,18 @@ class Level():
         self.player = Player(300, 50, self.eventman)
         self.scrfx = ScreenEffects()
 
-        
-
         #relier les objets au système d'evenements pour qu'ils les captent
         self.eventman.eventObjects.append(self.soundman)
         self.eventman.eventObjects.append(self.player)
         self.eventman.eventObjects.append(self.scrfx)
         self.eventman.eventObjects.append(self.gun)
+        self.eventman.eventObjects.append(self)
 
         self.ent_draw_sprites.add(self.player)
 
-        for xpos in [100, 250, 500, 444, 602]:
-            self.newEntity(xpos)
+        self.NewWave()
         
-        self.newCollectible( 400, 500)
+        self.newCollectible(400, 500)
     
     def readLevelFile(self, path):
         niveau = open(path, "r")
@@ -101,6 +100,12 @@ class Level():
                             way = 1
                             if dst < 0: way = -1
                             coll_spr.rect.centerx = coll_spr.rect.centerx + 5*way
+                
+            if sprite.state.value == sprite.states['DEAD'].value:
+                sprposx = sprite.posX 
+                sprposy = sprite.posY 
+                sprite.kill()
+                self.newCollectible(sprposx, sprposy)
 
     def updBullets(self, dt):
         for bul in self.bullet_sprites:
@@ -113,7 +118,7 @@ class Level():
 
             for ennemy in self.ennemy_sprites:
                 if ennemy.rect.clipline((bul.rectbefore.x, bul.rectbefore.y), (bul.rect.x, bul.rect.y)):
-                    ennemy.takedmg(0.1)
+                    ennemy.takedmg(0.5)
                     bul.kill()
                     break
             
@@ -136,13 +141,30 @@ class Level():
         self.tile_sprites.update(self.scroll)
         self.player.update(dt, self.tile_sprites, self.scroll)
 
+        alldead = True
+        for enn in self.ennemy_sprites:
+            if enn.state.value != enn.states['DEAD'].value:
+                alldead = False 
+                break
+        if alldead:
+            self.eventman.broadcast(self.eventman.evts['NEW_WAVE'])
+            
         self.updSprites(dt)
         self.updPlayer()
         self.updBullets(dt)
 
         self.scrfx.update()
         self.collectible_sprites.update(self.scroll, dt)
-    
+
+    def NewWave(self):
+        for i in range(4*self.waveN):
+            self.newEntity(random.randrange(100,2500))
+        self.waveN += 1
+
+    def eventGet(self, event):
+        if event.value == self.eventman.evts['NEW_WAVE'].value:
+            self.NewWave()
+
     def draw(self, win):
         self.tile_sprites.draw(win)
         self.ent_draw_sprites.draw(win)
