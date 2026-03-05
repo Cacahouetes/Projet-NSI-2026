@@ -4,7 +4,7 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, posx, posy, bDir):
         pygame.sprite.Sprite.__init__(self)
         self.type = 2 #bullet
-        self.image = pygame.Surface([5, 5])
+        self.image = pygame.Surface([5, 5]).convert_alpha()
         self.image.fill((255,255,0))
 
         self.dir = bDir
