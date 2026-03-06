@@ -1,7 +1,7 @@
 import random as rd
 from chest import ChestType
 from card import Rarity
-from database import CardRepository
+from card_repository import CardRepository
 
 REPOSITORY = CardRepository()
 

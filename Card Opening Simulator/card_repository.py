@@ -4,7 +4,7 @@ import sqlite3
 
 from card import Card, Category, Rarity
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "BDD", "database.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "..", "BDD", "game.db")
 
 RARITY_TO_DB = {
     Rarity.COMMUNE: "Commune",
