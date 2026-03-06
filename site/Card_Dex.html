@@ -24,8 +24,10 @@
                 <ul >
                     <li ><a href="Accueil.html">Accueil</a></li>
                     <li class="active"><a href="Card_Dex.html">Card Dex</a></li>
+                    <li ><a href="Statistiques_Globales.html">Statistiques Globales</a></li>
                 </ul>
             </div>    
+
         </nav>
     </header>
     <!-- Fin du haut de la page -->
@@ -52,20 +54,48 @@
         </main>
 
     <script>
-        let allCards = [];
+        convert_to_json('database.db', 'database.json'); // Convertir la base de données en JSON
+        let allCards = []; // Stockage global des données
 
-        // Charger les données de la base de données
-        async function loadCards() {
-            try {
-                const response = await fetch('/BDD/database.db'); // Adapter l'URL selon le serveur
-                allCards = await response.json();
-                displayCards(allCards);
-            } catch (error) {
-                console.error('Erreur:', error);
-                document.getElementById('cardsGrid').innerHTML = 
-                    '<div class="no-results">Erreur de chargement des cartes</div>';
+            async function loadCards() {
+                const grid = document.getElementById('cardsGrid');
+                
+                try {
+                    // Chargement du fichier JSON converti
+                    const response = await fetch('database.json');
+                    allCards = await response.json();
+
+                    displayCards(allCards);
+                } catch (error) {
+                    console.error("Erreur de chargement du JSON :", error);
+                }
             }
-        }
+
+            function displayCards(cardsToDisplay) {
+                const grid = document.getElementById('cardsGrid');
+                grid.innerHTML = cardsToDisplay.map(card => `
+                    <div class="card">
+                        <img src="Cards/${card.id}.png" loading="lazy" onclick="openModal('Cards/${card.id}.png')">
+                        <div class="card-info">
+                            <p class="card-name">${card.name}</p> </div>
+                    </div>
+                `).join('');
+            }
+
+            // Fonction de recherche améliorée
+            function filterCards() {
+                const term = document.getElementById('searchInput').value.toLowerCase();
+                
+                // On filtre dans le tableau allCards
+                const filtered = allCards.filter(card => {
+                    return card.name.toLowerCase().includes(term) || 
+                        card.id.toString().includes(term);
+                });
+
+                displayCards(filtered);
+            }
+
+            window.onload = loadCards;
 
         // Afficher les cartes
         function displayCards(cards) {
@@ -77,13 +107,8 @@
             }
             
             grid.innerHTML = cards.map(card => `
-                <div class="card">
+                <div class="card">  
                     <img src="${card.image || 'placeholder.png'}" alt="${card.name}" class="card-image">
-                    <div class="card-info">
-                        <div class="card-name">${card.name}</div>
-                        <div class="card-details">${card.type || ''}</div>
-                        <div class="card-details">${card.stats || ''}</div>
-                    </div>
                 </div>
             `).join('');
         }

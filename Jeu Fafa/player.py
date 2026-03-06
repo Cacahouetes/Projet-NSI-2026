@@ -1,5 +1,5 @@
 import pygame
-from math import ceil, atan2, cos
+from math import ceil, atan2, cos, sin
 class Player(pygame.sprite.Sprite):
     def loadimg(self, path):
         return pygame.image.load(path).convert_alpha()
@@ -156,6 +156,11 @@ class Player(pygame.sprite.Sprite):
     def eventGet(self, event):
         if event.value == self.eventman.evts['PLAYER_TAKE_DAMAGE'].value:
             self.curranim = "damage"
+        
+        if event.value == self.eventman.evts['PLAYER_FIRE'].value:
+            pass
+            #self.velocity[0] = -cos(self.msPlDir)/2
+            #self.velocity[1] -= sin(self.msPlDir)/2
         
         if event.value == self.eventman.evts['PLAYER_GET_THING'].value:
             self.score += 10

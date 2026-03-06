@@ -3,7 +3,7 @@ from enum import Enum
 
 class EventManager:
     def __init__(self):
-        self.evts = Enum('evts', [('ENNEMY_TAKE_DAMAGE', 0), ('PLAYER_TAKE_DAMAGE', 1), ('PLAYER_FIRE', 2), ('PLAYER_GET_THING', 3)])
+        self.evts = Enum('evts', [('ENNEMY_TAKE_DAMAGE', 0), ('PLAYER_TAKE_DAMAGE', 1), ('PLAYER_FIRE', 2), ('PLAYER_GET_THING', 3), ('NEW_WAVE', 4)])
         self.eventObjects = []
 
     

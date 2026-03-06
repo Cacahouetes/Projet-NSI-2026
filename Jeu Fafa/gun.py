@@ -2,18 +2,19 @@ import pygame
 from math import sin, cos
 
 class Gun():
-    def __init__(self):
+    def __init__(self, evtm):
         self.img = pygame.image.load("Assets/jeu arcade/gun.png").convert_alpha()
         self.rect = self.img.get_rect()
         self.tipx = 0
         self.tipy = 0
         self.angleOffset = 0
-        self.shootFlag = False
+        self.eventman = evtm
+
+    def eventGet(self, event):
+        if event.value == self.eventman.evts['PLAYER_FIRE'].value:
+            self.angleOffset = 20
 
     def update(self, win, player, angleDeg):
-        if self.shootFlag:
-            self.angleOffset = 20
-            self.shootFlag = False
 
         self.rect.centerx = player.rect.centerx - self.img.get_width()/2
         self.rect.centery = player.rect.centery - self.img.get_height()/2
@@ -35,5 +36,4 @@ class Gun():
         self.tipx = player.rect.centerx + 1*cos(angleDeg)
         self.tipy = player.rect.centery + 1*sin(angleDeg)
         
-
         self.angleOffset *= 0.8
