@@ -3,7 +3,7 @@ from math import sin, cos
 
 class Gun():
     def __init__(self, evtm):
-        self.img = pygame.image.load("Assets/jeu arcade/gun.png").convert_alpha()
+        self.img = pygame.image.load("Assets/jeu-arcade/gun.png").convert_alpha()
         self.rect = self.img.get_rect()
         self.tipx = 0
         self.tipy = 0

@@ -3,8 +3,8 @@ from enum import Enum
 class SoundManager:
     def __init__(self, eventm):
         self.eventman = eventm
-        #self.dmgsfx = pygame.mixer.Sound("Assets/jeu arcade/sfx/no.wav")
-        #self.ensfx =  pygame.mixer.Sound("Assets/jeu arcade/sfx/yes.wav")
+        #self.dmgsfx = pygame.mixer.Sound("Assets/jeu-arcade/sfx/no.wav")
+        #self.ensfx =  pygame.mixer.Sound("Assets/jeu-arcade/sfx/yes.wav")
 
     def eventGet(self, event):
 

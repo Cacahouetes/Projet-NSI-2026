@@ -22,9 +22,9 @@ class Level():
         self.waveN = 0
         
         self.tiles = []
-        self.tiles_img = [pygame.image.load("Assets/jeu arcade/fg.png").convert_alpha(), pygame.image.load("Assets/jeu arcade/bg.png").convert_alpha()]
+        self.tiles_img = [pygame.image.load("Assets/jeu-arcade/fg.png").convert_alpha(), pygame.image.load("Assets/jeu-arcade/bg.png").convert_alpha()]
 
-        self.readLevelFile("Jeu Fafa/niveau.txt")
+        self.readLevelFile("Jeu-Fafa/niveau.txt")
         self.LoadTileTexts()
         self.LoadTileSprites()
         

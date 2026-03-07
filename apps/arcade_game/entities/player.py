@@ -25,7 +25,7 @@ class Player(pygame.sprite.Sprite):
             self.images[anim] = []
             self.images_orig[anim] = []
             for i in range(len(self.animdict[anim])):
-                self.images[anim].append(self.loadimg("Assets/jeu arcade/playerspr/" + self.animdict[anim][i]))
+                self.images[anim].append(self.loadimg("Assets/jeu-arcade/playerspr/" + self.animdict[anim][i]))
                 self.images[anim][i] = pygame.transform.scale2x(self.images[anim][i])
                 self.images_orig[anim].append(self.images[anim][i])
         
