@@ -10,12 +10,15 @@ pygame.init()
 pygame.font.init()
 font = pygame.font.SysFont('Arial', 40)
 
-#pygame.mixer.init()
+pygame.mixer.init()
 win = pygame.display.set_mode((1280, 736), vsync=1)
 pygame.display.set_caption("jeu nsiissininisissini")
 clock = pygame.time.Clock()
 
 level = Level()
+
+pygame.mixer.music.load('Assets/jeu arcade/musique/onlyvoicemusic.mp3')
+pygame.mixer.music.play(-1)
 
 while running:
     dt = clock.tick(60) 
@@ -33,8 +36,8 @@ while running:
             if event.key == pygame.K_SPACE:
                 pass
     
-    if pygame.mouse.get_pressed():
-        level.NewBullet()
+    #if pygame.mouse.get_pressed():
+    #    level.NewBullet()
 
     level.update(dt)
     level.draw(win)

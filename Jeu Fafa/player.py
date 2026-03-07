@@ -45,6 +45,7 @@ class Player(pygame.sprite.Sprite):
         self.msPlDir = 0
 
     def update(self, delta, tileGroup, scroll):
+        self.velxbefore = abs(self.velocity[0])
         self.tick += 1
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -55,13 +56,17 @@ class Player(pygame.sprite.Sprite):
         
         if keys[pygame.K_UP] and not self.jumping:
             self.velocity[1] = 1
+            self.eventman.broadcast(self.eventman.evts['PLAYER_WALK_STOP'])
             self.jumping = True
-        
-
-        
+    
         self.movewCollision(tileGroup, scroll, delta)
         self.updMousePos()
         self.animations()
+        print(self.velocity[0])
+        if self.velxbefore < 0.1 and abs(self.velocity[0]) >= 0.1:
+            self.eventman.broadcast(self.eventman.evts['PLAYER_WALK_START'])
+        elif self.velxbefore > 0.1 and abs(self.velocity[0]) <= 0.1 :
+            self.eventman.broadcast(self.eventman.evts['PLAYER_WALK_STOP'])
 
     def animations(self):
         
