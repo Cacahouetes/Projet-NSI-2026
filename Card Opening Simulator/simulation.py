@@ -27,15 +27,15 @@ def count_card(stats, rarity):
         stats.divine_count += 1
     elif rarity == Rarity.UNIQUE:
         stats.unique_count += 1
-    elif rarity == Rarity.MYTHIC:
+    elif rarity == Rarity.MYTHIQUE:
         stats.mythic_count += 1
-    elif rarity == Rarity.LEGENDARY:
+    elif rarity == Rarity.LÉGENDAIRE:
         stats.legendary_count += 1
-    elif rarity == Rarity.EPIC:
+    elif rarity == Rarity.ÉPIQUE:
         stats.epic_count += 1
     elif rarity == Rarity.RARE:
         stats.rare_count += 1
-    elif rarity == Rarity.COMMON:
+    elif rarity == Rarity.COMMUNE:
         stats.common_count += 1
  
         
@@ -82,15 +82,15 @@ def display_stats(stats, title):
 
     print("\n--- Metrics game design ---")
     if stats.common_count:
-        print(f"1 COMMON tous les ~{stats.total_chests / stats.common_count:.1f} coffres")
+        print(f"1 COMMUNE tous les ~{stats.total_chests / stats.common_count:.1f} coffres")
     if stats.rare_count:
         print(f"1 RARE tous les ~{stats.total_chests / stats.rare_count:.1f} coffres")
     if stats.epic_count:
-        print(f"1 EPIC tous les ~{stats.total_chests / stats.epic_count:.1f} coffres")
+        print(f"1 ÉPIQUE tous les ~{stats.total_chests / stats.epic_count:.1f} coffres")
     if stats.legendary_count:
-        print(f"1 LEGENDARY tous les ~{stats.total_chests / stats.legendary_count:.1f} coffres")
+        print(f"1 LÉGENDAIRE tous les ~{stats.total_chests / stats.legendary_count:.1f} coffres")
     if stats.mythic_count:
-        print(f"1 MYTHIC tous les ~{stats.total_chests / stats.mythic_count:.1f} coffres")
+        print(f"1 MYTHIQUE tous les ~{stats.total_chests / stats.mythic_count:.1f} coffres")
     if stats.unique_count:
         print(f"1 UNIQUE tous les ~{stats.total_chests / stats.unique_count:.1f} coffres")
     if stats.divine_count:
@@ -101,7 +101,7 @@ def display_stats(stats, title):
         print(f"{size} cartes : {count}")
         
 if __name__ == "__main__":
-    N = 1_000_000
+    N = 1_000
 
     meme_stats = simulate_category(Category.MEME, N)
     omni_stats = simulate_omni(N)

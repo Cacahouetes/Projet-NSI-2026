@@ -40,9 +40,8 @@ class DailyRewardManager:
             player.stats.daily_current_streak += 1
 
         player.stats.daily_best_streak = max(player.stats.daily_best_streak, player.stats.daily_current_streak)
-
-        player.stats.daily_claims_total += 1
         player.stats.last_daily_timestamp = now
+        player.stats.daily_claims_total += 1
 
 
         reward_index = (player.stats.daily_current_streak - 1) % len(DAILY_REWARDS)
@@ -51,10 +50,24 @@ class DailyRewardManager:
         player.coins += reward.coins
         player.stats.coin_earned += reward.coins
 
-        player.inventory.add_card(reward.card)
-        player.carddex.add_card(reward.card)
-        player.stats.cards_obtained += 1
-        player.stats.cards_by_rarity[reward.card.rarity] += 1
-        player.stats.cards_by_category[reward.card.category] += 1
+        stats_to_save = {
+            'coins': player.coins,
+            'coins_earned': player.stats.coins_earned,
+            'last_ts': player.stats.last_daily_timestamp,
+            'current_streak': player.stats.daily_current_streak,
+            'best_streak': player.stats.daily_best_streak,
+            'streak_breaks': player.stats.daily_streak_breaks,
+            'total_claims': player.stats.daily_claims_total
+        }
+
+        import database_manager
+        database_manager.db_update_daily(player.id, stats_to_save, reward.coins, reward.card)
+
+        if reward.card:
+            player.inventory.add_card(reward.card)
+            player.carddex.add_card(reward.card)
+            player.stats.cards_obtained += 1
+            player.stats.cards_by_rarity[reward.card.rarity] += 1
+            player.stats.cards_by_category[reward.card.category] += 1
 
         return reward
