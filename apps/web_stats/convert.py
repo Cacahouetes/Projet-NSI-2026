@@ -7,8 +7,7 @@ def convert_to_json(database, output_json):
     conn.row_factory = sqlite3.Row  # Permet d'obtenir les noms de colonnes
     cursor = conn.cursor()
 
-    # 2. Récupérer le nom de la table (ici on suppose qu'elle s'appelle 'cards')
-    # Si tu ne connais pas le nom, remplace 'cards' par le nom de ta table
+    # 2. Récupérer le nom de la table et les données
     try:
         cursor.execute("SELECT * FROM CARDS")
         rows = cursor.fetchall()
