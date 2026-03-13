@@ -4,19 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Opening Simulator</title>
+
+    <!-- 
+        POLICES 
+         On importe deux familles depuis Google Fonts :
+         - Syne      → utilisée pour les titres, le logo, les labels
+         - Inter     → utilisée pour les paragraphes et textes courants
+     -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- 
+        ICÔNES 
+         Line Awesome : bibliothèque d'icônes SVG accessibles via des classes CSS.
+     -->
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"/>
+
+    <!-- 
+        FEUILLE DE STYLE PRINCIPALE
+         style_1.css contient TOUS les styles partagés entre les 3 pages 
+     -->
     <link rel="stylesheet" href="/static/style_1.css">
 </head>
 <body>
 
+<!-- 
+     HEADER
+     Barre fixée en haut, visible sur toutes les pages.
+     .header-inner : conteneur centré (max-width + padding).
+     .logo-dot     : petit cercle vert animé à gauche du nom.
+ -->
 <header>
     <div class="header-inner">
+        
+        <!-- Logo = lien vers la racine "/" -->
         <a href="/" class="logo">
             <div class="logo-dot"></div>
             Card Opening Simulator
         </a>
+        
+        <!-- Navigation : "active" = page actuellement affichée -->
         <nav>
             <ul>
                 <li class="active"><a href="/accueil">Accueil</a></li>
@@ -27,17 +54,38 @@
     </div>
 </header>
 
+
+<!-- 
+     HERO
+     Grande section d'accroche en haut de page.
+     <em>       : balise qui applique la couleur verte via style_1.css.
+     .hero-note : texte en rouge, note humoristique du projet.
+     .hero-desc : paragraphe de description générale.
+ -->
 <section class="hero">
+    <!-- Badge avec point -->
     <div class="hero-tag"><span></span> Projet NSI — 2026</div>
+
+    <!-- Titre principal — <em> = italique ET couleur verte -->
     <h1>Collectionnez.<br><em>Ouvrez.</em></h1>
+
+    <!-- Note affichée en rouge, légèrement transparente -->
     <p class="hero-note">Créé dans le cadre d'un projet NSI — à prendre avec humour !</p>
+
+    <!-- Description courte du projet en deux phrases -->
     <p class="hero-desc">
         Un jeu en deux parties : un arcade en vagues pour gagner des pièces,
         puis un simulateur pour ouvrir des boosters et compléter votre collection de 756 cartes uniques.
     </p>
-
 </section>
 
+
+<!-- 
+     BANDEAU DE STATISTIQUES (stats-strip)
+     Bande pleine largeur affichant 4 chiffres clés du projet.
+     .stats-inner : conteneur centré identique au reste de la page.
+     .sstat       : une statistique = une valeur (.sstat-val) + un label (.sstat-lbl).
+ -->
 <div class="stats-strip">
     <div class="stats-inner">
         <div class="sstat"><div class="sstat-val">756</div><div class="sstat-lbl">Cartes uniques</div></div>
@@ -47,16 +95,31 @@
     </div>
 </div>
 
+
+<!-- 
+     CONTENU PRINCIPAL
+     .content    : conteneur max-width centré avec padding.
+     .section-label : petit label en majuscules au-dessus de chaque groupe.
+     .grid-2     : grille CSS à 2 colonnes égales (passe en 1 colonne sur mobile).
+     .card       : bloc blanc-sur-fond-sombre avec bordure fine.
+     .card.full  : card qui occupe toute la largeur (grid-column: 1 / -1).
+     .card-head  : en-tête coloré de la carte avec le titre <h3>.
+ -->
 <main class="content">
 
+    <!--  Présentation des deux jeux  -->
     <div class="section-label">Le projet</div>
     <div class="grid-2">
+
+        <!-- Carte gauche : Jeu Arcade -->
         <div class="card">
             <div class="card-head"><h3>Jeu Arcade — Vagues</h3></div>
             <p>Un jeu de tir 2D en vagues progressives. Éliminez tous les ennemis pour passer à la vague suivante — ils deviennent plus nombreux et plus dangereux.</p>
             <p>Le joueur peut <strong>courir, sauter, s'accroupir</strong> et tirer simultanément. Des <strong>power-ups et nouvelles armes</strong> s'obtiennent au fil des vagues.</p>
             <p>Les points gagnés sont convertis en <strong>pièces</strong> pour acheter des boosters.</p>
         </div>
+
+        <!-- Carte droite : Card Opening Simulator -->
         <div class="card">
             <div class="card-head"><h3>Card Opening Simulator</h3></div>
             <p>Dépensez vos pièces pour ouvrir des boosters et compléter votre collection. Chaque booster contient <strong>10 cartes</strong> générées par un système probabiliste à slots.</p>
@@ -65,6 +128,13 @@
         </div>
     </div>
 
+    <!-- 
+        Système de raretés 
+         .card.full = pleine largeur (dépasse les 2 colonnes de grid-2).
+         .rarity-grid : grille de 7 cases, une par rareté.
+         .r-box.r-xxx : chaque case a sa propre couleur définie dans style_1.css
+                        (ex. r-commune = gris, r-divine = blanc nacré).
+     -->
     <div class="section-label" style="margin-top:10px">Raretés</div>
     <div class="card full">
         <div class="card-head"><h3>7 niveaux de rareté</h3></div>
@@ -80,20 +150,39 @@
         </div>
     </div>
 
+    <!--
+        Système de boosters
+         .booster-wrap : grille 2 colonnes pour les deux blocs de boosters.
+         .booster-box  : un bloc = un type de booster avec ses slots.
+         .slot-row     : une ligne = un numéro de slot + les probabilités associées.
+         .badge        : pastille colorée indiquant la rareté du booster lui-même.
+         Les couleurs inline des badges GODPACK/Omni utilisent les variables CSS
+         --gold et --purple définies dans style_1.css.
+     -->
     <div class="section-label" style="margin-top:10px">Boosters</div>
     <div class="card full">
         <div class="card-head"><h3>Types de boosters & composition</h3></div>
         <p>Avant chaque ouverture, un tirage détermine le type de booster : <strong>Standard</strong> (~99,5 %), <strong>GODPACK</strong> (1/200) ou <strong>DIVINE PACK</strong> (1/67 067). Un tirage bonus indépendant peut ajouter une 11ᵉ carte Divine (1/30 000).</p>
         <div class="booster-wrap">
+
+            <!-- Booster Standard : le plus fréquent, système de slots fixes -->
             <div class="booster-box">
                 <h4>Booster Standard <span class="badge">~99,5 %</span></h4>
+                
+                <!-- Chaque .slot-row = numéro(s) de slot à gauche + contenu possible à droite -->
                 <div class="slot-row"><span class="slot-num">Slots 1–6</span><span class="slot-content">Commune <span>(100 %)</span></span></div>
                 <div class="slot-row"><span class="slot-num">Slots 7–9</span><span class="slot-content">Rare <span>(75 %)</span> / Épique <span>(25 %)</span></span></div>
                 <div class="slot-row"><span class="slot-num">Slot 10</span><span class="slot-content">Rare <span>55 %</span> · Épique <span>30 %</span> · Légendaire <span>10 %</span> · Mythique <span>4,9 %</span> · Unique <span>0,1 %</span></span></div>
             </div>
+
+            <!-- GODPACK (ultra-rare) + Omni-Booster (toutes catégories) -->
             <div class="booster-box">
+
+                <!-- Couleur dorée via variable CSS --gold -->
                 <h4>GODPACK <span class="badge" style="background:rgba(245,158,11,0.12);color:var(--gold);border-color:rgba(245,158,11,0.25)">1 / 200</span></h4>
                 <div class="slot-row"><span class="slot-num">10 cartes</span><span class="slot-content">Légendaire <span>(70 %)</span> · Mythique <span>(29 %)</span> · Unique <span>(1 %)</span></span></div>
+                
+                <!-- Couleur violette via variable CSS --purple -->
                 <h4 style="margin-top:16px">Omni-Booster <span class="badge" style="background:rgba(168,85,247,0.12);color:var(--purple);border-color:rgba(168,85,247,0.25)">756 cartes</span></h4>
                 <div class="slot-row"><span class="slot-num">Slots 1–5</span><span class="slot-content">Commune <span>(100 %)</span></span></div>
                 <div class="slot-row"><span class="slot-num">Slots 6–8</span><span class="slot-content">Rare <span>(60 %)</span> / Épique <span>(40 %)</span></span></div>
@@ -102,10 +191,17 @@
         </div>
     </div>
 
+    <!--
+        Stack technique + Fonctionnalités 
+         .pills : conteneur flex qui affiche les technos comme des étiquettes.
+         .pill  : une étiquette individuelle (fond sombre + bordure fine).
+    -->
     <div class="grid-2">
         <div class="card">
             <div class="card-head"><h3>Stack technique</h3></div>
             <p>Entièrement en Python. Les données sont stockées localement en SQLite et exportées en JSON pour le CardDex web.</p>
+            
+            <!-- Étiquettes visuelles pour chaque technologie utilisée -->
             <div class="pills">
                 <span class="pill">Python</span>
                 <span class="pill">Pygame</span>
@@ -121,22 +217,42 @@
         </div>
     </div>
 
+    <!--
+        Équipe
+         .team-grid : grille 4 colonnes (une colonne par membre).
+         .team-box  : carte d'un membre avec son nom et son rôle.
+    -->
     <div class="section-label" style="margin-top:10px">Équipe</div>
     <div class="card full">
         <div class="team-grid">
             <div class="team-box">
-            <div class="team-name">Fafa</div><div class="team-role">Jeu Arcade · Menu · Musiques</div></div>
+                <div class="team-name">Fafa</div>
+                <div class="team-role">Jeu Arcade · Menu · Musiques</div>
+            </div>
             <div class="team-box">
-            <div class="team-name">Thyraël</div><div class="team-role">Card Opening Simulator · Logique boosters</div></div>
+                <div class="team-name">Thyraël</div>
+                <div class="team-role">Card Opening Simulator · Logique boosters</div>
+            </div>
             <div class="team-box">
-            <div class="team-name">Tristan</div><div class="team-role">Base de données · CardDex · Stats</div></div>
+                <div class="team-name">Tristan</div>
+                <div class="team-role">Base de données · CardDex · Stats</div>
+            </div>
             <div class="team-box">
-            <div class="team-name">Augustin</div><div class="team-role">Base de données · CardDex · Stats</div></div>
+                <div class="team-name">Augustin</div>
+                <div class="team-role">Base de données · CardDex · Stats</div>
+            </div>
         </div>
     </div>
 
 </main>
 
+
+<!-- 
+     FOOTER
+     Pied de page en deux colonnes (flex) :
+     .footer-left  : noms de l'équipe + contexte scolaire.
+     .footer-right : copyright.
+ -->
 <footer>
     <div class="footer-inner">
         <div class="footer-left">
