@@ -5,35 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Dex — Card Opening Simulator</title>
 
-    <!-- ══ POLICES ══════════════════════════════════════════════════════════
+    <!--
+        POLICES 
          Syne  → titres, labels, badges de rareté
          Inter → texte courant, noms de cartes, filtres
-    ═══════════════════════════════════════════════════════════════════════ -->
+     -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
-    <!-- ══ ICÔNES ════════════════════════════════════════════════════════════
+    <!--
+        ICÔNES
          Line Awesome — utilisé ici pour :
          - <i class="las la-search"> → icône loupe dans la barre de recherche
          - <i class="las la-times">  → icône croix de fermeture du modal
-    ═══════════════════════════════════════════════════════════════════════ -->
+     -->
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"/>
 
-    <!-- ══ FEUILLES DE STYLE ════════════════════════════════════════════════
+    <!--
+        FEUILLES DE STYLE
          style_1.css : styles partagés (header, footer, nav, variables CSS)
          style_2.css : styles propres au Card Dex uniquement
                        (barre de recherche, grille de cartes, modal)
-    ═══════════════════════════════════════════════════════════════════════ -->
+     -->
     <link rel="stylesheet" href="/static/style_1.css">
     <link rel="stylesheet" href="/static/style_2.css">
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════════════════════════════════
+<!-- 
      HEADER
      Identique sur toutes les pages.
      "active" est placé sur "Card Dex" pour indiquer la page courante.
-════════════════════════════════════════════════════════════════════════ -->
+ -->
 <header>
     <div class="header-inner">
         <a href="/" class="logo">
@@ -51,9 +54,9 @@
 </header>
 
 
-<!-- ════════════════════════════════════════════════════════════════════════
+<!-- 
      EN-TÊTE DE PAGE
-════════════════════════════════════════════════════════════════════════ -->
+ -->
 <div class="page-header">
     <div class="page-header-inner">
         <h1>Card Dex</h1>
@@ -62,16 +65,17 @@
 </div>
 
 
-<!-- ════════════════════════════════════════════════════════════════════════
+<!-- 
      ZONE PRINCIPALE DU CARD DEX
-════════════════════════════════════════════════════════════════════════ -->
+ -->
 <div class="dex-container">
 
-    <!-- ── Barre de recherche et filtres ──────────────────────────────
+    <!--
+        Barre de recherche et filtres 
          #searchInput    : champ de saisie libre (filtrage par nom ou ID).
          #rarityFilter   : filtre sur la colonne "rarity" de CARDS.
          #categoryFilter : filtre sur la colonne "category" de CARDS.
-    ─────────────────────────────────────────────────────────────────── -->
+     -->
     <div class="search-bar">
         <i class="las la-search search-icon"></i>
         <input type="text" id="searchInput" placeholder="Rechercher une carte par nom ou ID...">
@@ -108,13 +112,13 @@
 </div>
 
 
-<!-- ════════════════════════════════════════════════════════════════════════
+<!-- 
      MODAL DE DÉTAIL D'UNE CARTE
      .modal-overlay : fond semi-transparent — clic dessus = fermeture.
      .modal-card    : boîte centrée — stopPropagation évite la fermeture
                       accidentelle au clic sur la carte elle-même.
-     La classe "open" (ajoutée/retirée par JS) contrôle la visibilité.
-════════════════════════════════════════════════════════════════════════ -->
+     La classe "open" contrôle la visibilité.
+ -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
     <div class="modal-card" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeModal()">
@@ -129,9 +133,9 @@
 </div>
 
 
-<!-- ════════════════════════════════════════════════════════════════════════
+<!--
      FOOTER
-════════════════════════════════════════════════════════════════════════ -->
+ -->
 <footer>
     <div class="footer-inner">
         <div class="footer-left">
@@ -142,25 +146,22 @@
 </footer>
 
 
-<!-- ════════════════════════════════════════════════════════════════════════
+<!-- 
      JAVASCRIPT
-════════════════════════════════════════════════════════════════════════ -->
+ -->
 <script>
     // Stocke toutes les cartes reçues du serveur pour filtrer côté client
     // sans refaire de requête réseau à chaque frappe.
     let allCards = [];
 
 
-    // ── loadCards() ───────────────────────────────────────────────────────
+    // loadCards()
     // Appelle la route Flask /api/cards qui lit la table CARDS dans SQLite
     // et la renvoie en JSON. Plus besoin de database.json.
     //
     // Normalisation des données reçues :
     //   card_id    → id        (pour la recherche par ID dans applyFilters)
     //   image_path → image     (chemin complet servi par Flask via /cards/)
-    //
-    // Exemple : image_path = "Cards/Commune/1.png"
-    //           image      = "/cards/Commune/1.png"  (route Flask)
     async function loadCards() {
         const grid = document.getElementById('cardsGrid');
         try {
@@ -183,7 +184,7 @@
     }
 
 
-    // ── getRarityClass(rarity) ────────────────────────────────────────────
+    // getRarityClass(rarity)
     // Convertit le nom d'une rareté en classe CSS colorée.
     // Ces classes sont définies dans style_1.css et style_2.css.
     function getRarityClass(rarity) {
@@ -200,10 +201,10 @@
     }
 
 
-    // ── displayCards(cards) ───────────────────────────────────────────────
+    // displayCards(cards)
     // Prend un tableau de cartes filtré et génère le HTML de la grille.
     // loading="lazy" : les images hors écran ne sont téléchargées que
-    // quand l'utilisateur scrolle jusqu'à elles (optimisation réseau).
+    // quand l'utilisateur scrolle jusqu'à elles.
     function displayCards(cards) {
         const grid = document.getElementById('cardsGrid');
         const info = document.getElementById('resultsInfo');
@@ -230,7 +231,7 @@
     }
 
 
-    // ── applyFilters() ────────────────────────────────────────────────────
+    // applyFilters()
     // Lit les 3 contrôles et filtre allCards avec .filter().
     // Les catégories en base sont en MAJUSCULES (MEME, MOTS…),
     // on compare donc en majuscules des deux côtés.
@@ -251,7 +252,7 @@
     }
 
 
-    // ── openModal() ───────────────────────────────────────────────────────
+    // openModal()
     // Remplit le modal avec les infos de la carte cliquée et l'affiche.
     function openModal(img, name, rarity, category) {
         document.getElementById('modalImage').src = img;
@@ -263,13 +264,13 @@
     }
 
 
-    // ── closeModal() ──────────────────────────────────────────────────────
+    // closeModal()
     function closeModal() {
         document.getElementById('modalOverlay').classList.remove('open');
     }
 
 
-    // ── Écouteurs d'événements ─────────────────────────────────────────────
+    // Écouteurs d'événements
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('rarityFilter').addEventListener('change', applyFilters);
     document.getElementById('categoryFilter').addEventListener('change', applyFilters);

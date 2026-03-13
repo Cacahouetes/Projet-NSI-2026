@@ -364,7 +364,7 @@
             content.innerHTML += `<div class="msg">Aucune donnée de rareté pour ce joueur.</div>`;
         }
 
-        // Animation d'apparition (définie dans style_3.css via @keyframes fade-in)
+        // Animation d'apparition
         content.classList.add('fade-in');
     }
 
@@ -380,11 +380,11 @@
     // statCard(label, value, color, sub)
     // Helper : génère le HTML d'une carte statistique.
     // Paramètres :
-    //   label → titre de la stat (ex. "Pièces actuelles")
-    //   value → valeur à afficher en grand (ex. "1 234")
+    //   label → titre de la stat
+    //   value → valeur à afficher en grand
     //   color → '' (blanc) | 'green' | 'red' | 'blue'
     //           applique la classe val-xxx qui change la couleur du chiffre
-    //   sub   → sous-texte optionnel (ex. "jours consécutifs")
+    //   sub   → sous-texte optionnel
     function statCard(label, value, color = '', sub = '') {
         return `
             <div class="stat-card">
