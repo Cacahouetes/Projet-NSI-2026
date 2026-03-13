@@ -1,252 +1,244 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Player Stats</title>
-  <link rel="stylesheet" href="style_3.css">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques — Card Opening Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style_1.css">
+    <link rel="stylesheet" href="/static/style_3.css">
 </head>
-
 <body>
 
-<div class="header-logo">
-            <a href="/">Card Opening Simulator</a>
-        </div>
-
-        <nav class="nav">
-            <div class="nav-items">
-                <ul >
-                    <li class="active"><a href="Accueil.html">Accueil</a></li>
-                    <li ><a href="Card_Dex.html">Card Dex</a></li>
-                    <li ><a href="stat.html">Statistiques Globales</a></li>
-                </ul>
-            </div>    
+<header>
+    <div class="header-inner">
+        <a href="/" class="logo">
+            <div class="logo-dot"></div>
+            Card Opening Simulator
+        </a>
+        <nav>
+            <ul>
+                <li><a href="/accueil">Accueil</a></li>
+                <li><a href="/carddex">Card Dex</a></li>
+                <li class="active"><a href="/stats">Statistiques</a></li>
+            </ul>
         </nav>
-        </div>
-<div class="selector-bar">
-  <label for="playerSelect">Joueur</label>
-  <select id="playerSelect">
-    <option value="">— Choisir un joueur —</option>
-  </select>
-  <span id="statusMsg" style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted)"></span>
+    </div>
+</header>
+
+<div class="page-header">
+    <div class="page-header-inner">
+        <h1>Statistiques</h1>
+        <p class="page-subtitle">Suivez la progression et les performances de chaque joueur</p>
+    </div>
 </div>
 
-<div id="content"></div>
+<div class="stat-container">
 
-<!-- SQL.js (SQLite in browser via WASM) -->
+    <div class="selector-bar">
+        <label for="playerSelect">Joueur</label>
+        <select id="playerSelect">
+            <option value="">— Choisir un joueur —</option>
+        </select>
+        <span id="statusMsg" class="status-msg"></span>
+    </div>
+
+    <div id="content"></div>
+
+</div>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-left">
+            Réalisé par <strong>Augustin</strong>, <strong>Tristan</strong>, <strong>Thyraël</strong> & <strong>Fafa</strong> — Projet NSI Terminale
+        </div>
+        <div class="footer-right">© 2026 Card Opening Simulator — Tous droits réservés</div>
+    </div>
+</footer>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
-
 <script>
-
-// Chemin vers la base de données SQLite (relatif à cette page HTML)
-const DB_PATH = 'data/game.db';
-
-
+const DB_PATH = '../../data/game.db';
 let db = null;
 
 async function initDB() {
-  setStatus('Chargement de la base de données…');
-  try {
-    const SQL = await initSqlJs({
-      locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
-    });
-    const res = await fetch(DB_PATH);
-    if (!res.ok) throw new Error(`HTTP ${res.status} — fichier introuvable : ${DB_PATH}`);
-    const buf = await res.arrayBuffer();
-    db = new SQL.Database(new Uint8Array(buf));
-    setStatus('');
-    loadPlayers();
-  } catch (e) {
-    setStatus(`${e.message}`);
-    document.getElementById('content').innerHTML =
-      `<div class="msg">Impossible de charger <code>${DB_PATH}</code>.</div>`;
-  }
+    setStatus('Chargement de la base de données…');
+    try {
+        const SQL = await initSqlJs({
+            locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
+        });
+        const res = await fetch(DB_PATH);
+        if (!res.ok) throw new Error(`HTTP ${res.status} — fichier introuvable : ${DB_PATH}`);
+        const buf = await res.arrayBuffer();
+        db = new SQL.Database(new Uint8Array(buf));
+        setStatus('');
+        loadPlayers();
+    } catch (e) {
+        setStatus(e.message);
+        document.getElementById('content').innerHTML =
+            `<div class="msg">Impossible de charger <code>${DB_PATH}</code>.</div>`;
+    }
 }
 
 function setStatus(msg) {
-  document.getElementById('statusMsg').textContent = msg;
+    document.getElementById('statusMsg').textContent = msg;
 }
 
 function query(sql, params = []) {
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-  const rows = [];
-  while (stmt.step()) rows.push(stmt.getAsObject());
-  stmt.free();
-  return rows;
+    const stmt = db.prepare(sql);
+    stmt.bind(params);
+    const rows = [];
+    while (stmt.step()) rows.push(stmt.getAsObject());
+    stmt.free();
+    return rows;
 }
 
 function loadPlayers() {
-  const players = query('SELECT player_id, username, created_at FROM PLAYERS ORDER BY username');
-  const sel = document.getElementById('playerSelect');
-  players.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.player_id;
-    opt.textContent = p.username;
-    sel.appendChild(opt);
-  });
+    const players = query('SELECT player_id, username, created_at FROM PLAYERS ORDER BY username');
+    const sel = document.getElementById('playerSelect');
+    players.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.player_id;
+        opt.textContent = p.username;
+        sel.appendChild(opt);
+    });
 }
 
 function formatTime(seconds) {
-  if (!seconds) return '0s';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (h > 0) return `${h}h ${m}m`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
+    if (!seconds) return '0s';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
 }
 
 function formatDate(ts) {
-  if (!ts) return '—';
-  return new Date(ts * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+    if (!ts) return '—';
+    return new Date(ts * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function getRarityClass(rarity) {
+    const map = {
+        'Commune': 'r-commune', 'Rare': 'r-rare', 'Épique': 'r-epique',
+        'Légendaire': 'r-legend', 'Mythique': 'r-mythique',
+        'Unique': 'r-unique', 'Divine': 'r-divine'
+    };
+    return map[rarity] || '';
 }
 
 function renderStats(playerId) {
-  const player = query('SELECT * FROM PLAYERS WHERE player_id = ?', [playerId])[0];
-  if (!player) return;
+    const player  = query('SELECT * FROM PLAYERS WHERE player_id = ?', [playerId])[0];
+    if (!player) return;
 
-  const stats   = query('SELECT * FROM PLAYER_STATS WHERE player_id = ?', [playerId])[0] || {};
-  const rarity  = query('SELECT * FROM PLAYER_RARITY_STATS WHERE player_id = ?', [playerId]);
-  const cards   = query('SELECT COUNT(*) as cnt FROM PLAYER_CARDS WHERE player_id = ?', [playerId])[0] || {};
-  const carddex = query('SELECT COUNT(*) as cnt FROM PLAYER_CARDDEX WHERE player_id = ?', [playerId])[0] || {};
-  const totalCards = query('SELECT COUNT(*) as cnt FROM CARDS')[0] || {};
-  const fusions = query('SELECT COUNT(*) as total, SUM(success) as wins FROM PLAYER_FUSIONS WHERE player_id = ?', [playerId])[0] || {};
-  const chests  = query('SELECT COUNT(*) as cnt FROM CHEST_OPENINGS WHERE player_id = ?', [playerId])[0] || {};
-  const achiev  = query('SELECT COUNT(*) as cnt FROM PLAYER_ACHIEVEMENTS WHERE player_id = ?', [playerId])[0] || {};
+    const stats      = query('SELECT * FROM PLAYER_STATS WHERE player_id = ?', [playerId])[0] || {};
+    const rarity     = query('SELECT * FROM PLAYER_RARITY_STATS WHERE player_id = ?', [playerId]);
+    const cards      = query('SELECT COUNT(*) as cnt FROM PLAYER_CARDS WHERE player_id = ?', [playerId])[0] || {};
+    const carddex    = query('SELECT COUNT(*) as cnt FROM PLAYER_CARDDEX WHERE player_id = ?', [playerId])[0] || {};
+    const totalCards = query('SELECT COUNT(*) as cnt FROM CARDS')[0] || {};
+    const fusions    = query('SELECT COUNT(*) as total, SUM(success) as wins FROM PLAYER_FUSIONS WHERE player_id = ?', [playerId])[0] || {};
+    const chests     = query('SELECT COUNT(*) as cnt FROM CHEST_OPENINGS WHERE player_id = ?', [playerId])[0] || {};
+    const achiev     = query('SELECT COUNT(*) as cnt FROM PLAYER_ACHIEVEMENTS WHERE player_id = ?', [playerId])[0] || {};
 
-  const dexPct = totalCards.cnt > 0 ? Math.round((carddex.cnt / totalCards.cnt) * 100) : 0;
+    const dexPct = totalCards.cnt > 0 ? Math.round((carddex.cnt / totalCards.cnt) * 100) : 0;
 
-  const content = document.getElementById('content');
-  content.innerHTML = '';
-  content.className = 'fade-in';
+    const content = document.getElementById('content');
+    content.innerHTML = '';
 
-  // ── Player info ──
-  content.innerHTML += `
-    <div class="player-info">
-      <div class="avatar">${player.username[0].toUpperCase()}</div>
-      <div>
-        <div class="player-name">${player.username}</div>
-        <div class="player-meta">ID #${player.player_id} · Inscrit le ${formatDate(player.created_at)}</div>
-      </div>
-    </div>`;
-
-  // ── Main stats ──
-  content.innerHTML += `<div class="section-title">Économie & Activité</div>`;
-  content.innerHTML += `
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Pièces actuelles</div>
-        <div class="stat-value coins">${(stats.coins || 0).toLocaleString('fr')}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Pièces gagnées</div>
-        <div class="stat-value">${(stats.coins_earned || 0).toLocaleString('fr')}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Pièces dépensées</div>
-        <div class="stat-value">${(stats.coins_spent || 0).toLocaleString('fr')}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Max pièces détenues</div>
-        <div class="stat-value">${(stats.max_coins_held || 0).toLocaleString('fr')}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Temps de jeu</div>
-        <div class="stat-value time">${formatTime(stats.play_time_seconds)}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Coffres ouverts</div>
-        <div class="stat-value">${chests.cnt || 0}</div>
-      </div>
-    </div>`;
-
-  // ── Daily Streak ──
-  content.innerHTML += `<div class="section-title">Daily Rewards</div>`;
-  content.innerHTML += `
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Streak actuel</div>
-        <div class="stat-value streak">${stats.daily_current_streak || 0}</div>
-        <div class="stat-sub">jours consécutifs</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Meilleur streak</div>
-        <div class="stat-value streak">${stats.daily_best_streak || 0}</div>
-        <div class="stat-sub">record personnel</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Streaks brisés</div>
-        <div class="stat-value breaks">${stats.daily_streak_breaks || 0}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Dernier daily</div>
-        <div class="stat-value" style="font-size:1.3rem;padding-top:0.3rem">${formatDate(stats.last_daily_timestamp)}</div>
-      </div>
-    </div>`;
-
-  // ── Cards & Carddex ──
-  content.innerHTML += `<div class="section-title">Collection</div>`;
-  content.innerHTML += `
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Cartes en possession</div>
-        <div class="stat-value">${cards.cnt || 0}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Carddex</div>
-        <div class="stat-value">${carddex.cnt || 0} <span style="font-size:1rem;color:var(--muted)">/ ${totalCards.cnt}</span></div>
-        <div class="progress-wrap">
-          <div class="stat-sub">${dexPct}% complété</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${dexPct}%"></div></div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Fusions totales</div>
-        <div class="stat-value">${fusions.total || 0}</div>
-        <div class="stat-sub">${fusions.wins || 0} réussies</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Succès débloqués</div>
-        <div class="stat-value">${achiev.cnt || 0}</div>
-      </div>
-    </div>`;
-
-  // ── Rarity Stats ──
-  content.innerHTML += `<div class="section-title">Stats par Rareté</div>`;
-  if (rarity.length > 0) {
-    const rows = rarity.map(r => `
-      <tr>
-        <td><span class="badge ${r.rarity}">${r.rarity}</span></td>
-        <td>${r.obtained || 0}</td>
-        <td>${r.sold || 0}</td>
-        <td>${r.fused || 0}</td>
-      </tr>`).join('');
+    // Player info
     content.innerHTML += `
-      <div class="table-wrap">
-        <table class="rarity-table">
-          <thead><tr><th>Rareté</th><th>Obtenues</th><th>Vendues</th><th>Fusionnées</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
-  } else {
-    content.innerHTML += `<div class="table-wrap"><p class="msg">Aucune donnée de rareté pour ce joueur.</p></div>`;
-  }
+        <div class="player-info">
+            <div class="player-avatar">${player.username[0].toUpperCase()}</div>
+            <div>
+                <div class="player-name">${player.username}</div>
+                <div class="player-meta">ID #${player.player_id} · Inscrit le ${formatDate(player.created_at)}</div>
+            </div>
+        </div>`;
 
-  // Re-trigger animation
-  content.style.animation = 'none';
-  requestAnimationFrame(() => { content.style.animation = ''; content.classList.add('fade-in'); });
+    // Economie
+    content.innerHTML += sectionTitle('Économie & Activité');
+    content.innerHTML += `
+        <div class="stats-grid">
+            ${statCard('Pièces actuelles',    (stats.coins || 0).toLocaleString('fr'), 'green')}
+            ${statCard('Pièces gagnées',      (stats.coins_earned || 0).toLocaleString('fr'))}
+            ${statCard('Pièces dépensées',    (stats.coins_spent || 0).toLocaleString('fr'))}
+            ${statCard('Max pièces détenues', (stats.max_coins_held || 0).toLocaleString('fr'))}
+            ${statCard('Temps de jeu',        formatTime(stats.play_time_seconds), 'blue')}
+            ${statCard('Coffres ouverts',     chests.cnt || 0)}
+        </div>`;
+
+    // Daily
+    content.innerHTML += sectionTitle('Daily Rewards');
+    content.innerHTML += `
+        <div class="stats-grid">
+            ${statCard('Streak actuel',  stats.daily_current_streak || 0, 'green', 'jours consécutifs')}
+            ${statCard('Meilleur streak', stats.daily_best_streak || 0, 'green', 'record personnel')}
+            ${statCard('Streaks brisés', stats.daily_streak_breaks || 0, 'red')}
+            ${statCard('Dernier daily',  formatDate(stats.last_daily_timestamp))}
+        </div>`;
+
+    // Collection
+    content.innerHTML += sectionTitle('Collection');
+    content.innerHTML += `
+        <div class="stats-grid">
+            ${statCard('Cartes en possession', cards.cnt || 0)}
+            <div class="stat-card">
+                <div class="stat-label">CardDex</div>
+                <div class="stat-value">${carddex.cnt || 0} <span class="stat-total">/ ${totalCards.cnt}</span></div>
+                <div class="stat-sub">${dexPct}% complété</div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${dexPct}%"></div></div>
+            </div>
+            ${statCard('Fusions totales', fusions.total || 0, '', `${fusions.wins || 0} réussies`)}
+            ${statCard('Succès débloqués', achiev.cnt || 0)}
+        </div>`;
+
+    // Rarity table
+    content.innerHTML += sectionTitle('Stats par rareté');
+    if (rarity.length > 0) {
+        const rows = rarity.map(r => `
+            <tr>
+                <td><span class="rarity-badge ${getRarityClass(r.rarity)}">${r.rarity}</span></td>
+                <td>${r.obtained || 0}</td>
+                <td>${r.sold || 0}</td>
+                <td>${r.fused || 0}</td>
+            </tr>`).join('');
+        content.innerHTML += `
+            <div class="table-wrap">
+                <table class="rarity-table">
+                    <thead><tr><th>Rareté</th><th>Obtenues</th><th>Vendues</th><th>Fusionnées</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    } else {
+        content.innerHTML += `<div class="msg">Aucune donnée de rareté pour ce joueur.</div>`;
+    }
+
+    content.classList.add('fade-in');
+}
+
+function sectionTitle(text) {
+    return `<div class="section-title">${text}</div>`;
+}
+
+function statCard(label, value, color = '', sub = '') {
+    return `
+        <div class="stat-card">
+            <div class="stat-label">${label}</div>
+            <div class="stat-value ${color ? 'val-' + color : ''}">${value}</div>
+            ${sub ? `<div class="stat-sub">${sub}</div>` : ''}
+        </div>`;
 }
 
 document.getElementById('playerSelect').addEventListener('change', e => {
-  const val = e.target.value;
-  if (!val) { document.getElementById('content').innerHTML = ''; return; }
-  renderStats(parseInt(val));
+    const val = e.target.value;
+    if (!val) { document.getElementById('content').innerHTML = ''; return; }
+    renderStats(parseInt(val));
 });
 
 initDB();
 </script>
+
 </body>
 </html>

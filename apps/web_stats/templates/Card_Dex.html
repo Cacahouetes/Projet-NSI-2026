@@ -3,128 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Dex</title>
-    <link rel="stylesheet" href="style_2.css">
-        <link 
-      rel= "stylesheet"
-      href= "https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css" 
-    />
+    <title>Card Dex — Card Opening Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"/>
+    <link rel="stylesheet" href="/static/style_1.css">
+    <link rel="stylesheet" href="/static/style_2.css">
 </head>
-
 <body>
 
-    <!-- Haut de la page -->
-    <header >
-        <div class="header-logo">
-            <a href="/">Card Opening Simulator</a>
-        </div>
-
-        <nav class="nav">
-            <div class="nav-items">
-                <ul >
-                    <li ><a href="Accueil.html">Accueil</a></li>
-                    <li class="active"><a href="Card_Dex.html">Card Dex</a></li>
-                    <li ><a href="stat.html">Statistiques Globales</a></li>
-                </ul>
-            </div>    
-
+<header>
+    <div class="header-inner">
+        <a href="/" class="logo">
+            <div class="logo-dot"></div>
+            Card Opening Simulator
+        </a>
+        <nav>
+            <ul>
+                <li><a href="/accueil">Accueil</a></li>
+                <li class="active"><a href="/carddex">Card Dex</a></li>
+                <li><a href="/stats">Statistiques</a></li>
+            </ul>
         </nav>
-    </header>
-    <!-- Fin du haut de la page -->
+    </div>
+</header>
 
-    <div class="container">
+<div class="page-header">
+    <div class="page-header-inner">
         <h1>Card Dex</h1>
-        
-        <div class="search-box">
-            <input 
-                type="text" 
-                id="searchInput" 
-                placeholder="Rechercher une carte..."
-            >
-        </div>
-        
-        <div class="cards-grid" id="cardsGrid">
-            <div class="no-results">Chargement des cartes...</div>
+        <p class="page-subtitle">Explorez les 756 cartes de la collection</p>
+    </div>
+</div>
+
+<div class="dex-container">
+
+    <div class="search-bar">
+        <i class="las la-search search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher une carte par nom ou ID...">
+        <div class="filter-group">
+            <select id="rarityFilter">
+                <option value="">Toutes les raretés</option>
+                <option value="Commune">Commune</option>
+                <option value="Rare">Rare</option>
+                <option value="Épique">Épique</option>
+                <option value="Légendaire">Légendaire</option>
+                <option value="Mythique">Mythique</option>
+                <option value="Unique">Unique</option>
+                <option value="Divine">Divine</option>
+            </select>
+            <select id="categoryFilter">
+                <option value="">Toutes les catégories</option>
+                <option value="Meme">Mème</option>
+                <option value="Mots">Mots</option>
+                <option value="Objets">Objets</option>
+                <option value="Personnages">Personnages</option>
+                <option value="Concepts">Concepts</option>
+            </select>
         </div>
     </div>
-        </header>
-    
-        <main>
-            <!-- Les cartes seront affichées ici -->
-        </main>
 
-    <script>
-        convert_to_json('database.db', 'database.json'); // Convertir la base de données en JSON
-        let allCards = []; // Stockage global des données
+    <div class="results-info" id="resultsInfo"></div>
 
-            async function loadCards() {
-                const grid = document.getElementById('cardsGrid');
-                
-                try {
-                    // Chargement du fichier JSON converti
-                    const response = await fetch('database.json');
-                    allCards = await response.json();
+    <div class="cards-grid" id="cardsGrid">
+        <div class="no-results">Chargement des cartes...</div>
+    </div>
 
-                    displayCards(allCards);
-                } catch (error) {
-                    console.error("Erreur de chargement du JSON :", error);
-                }
-            }
+</div>
 
-            function displayCards(cardsToDisplay) {
-                const grid = document.getElementById('cardsGrid');
-                grid.innerHTML = cardsToDisplay.map(card => `
-                    <div class="card">
-                        <img src="Cards/${card.id}.png" loading="lazy" onclick="openModal('Cards/${card.id}.png')">
-                        <div class="card-info">
-                            <p class="card-name">${card.name}</p> </div>
-                    </div>
-                `).join('');
-            }
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()">
+            <i class="las la-times"></i>
+        </button>
+        <img id="modalImage" src="" alt="">
+        <div class="modal-info">
+            <div class="modal-name" id="modalName"></div>
+            <div class="modal-meta" id="modalMeta"></div>
+        </div>
+    </div>
+</div>
 
-            // Fonction de recherche améliorée
-            function filterCards() {
-                const term = document.getElementById('searchInput').value.toLowerCase();
-                
-                // On filtre dans le tableau allCards
-                const filtered = allCards.filter(card => {
-                    return card.name.toLowerCase().includes(term) || 
-                        card.id.toString().includes(term);
-                });
+<footer>
+    <div class="footer-inner">
+        <div class="footer-left">
+            Réalisé par <strong>Augustin</strong>, <strong>Tristan</strong>, <strong>Thyraël</strong> & <strong>Fafa</strong> — Projet NSI Terminale
+        </div>
+        <div class="footer-right">© 2026 Card Opening Simulator — Tous droits réservés</div>
+    </div>
+</footer>
 
-                displayCards(filtered);
-            }
+<script>
+    let allCards = [];
 
-            window.onload = loadCards;
+    async function loadCards() {
+        const grid = document.getElementById('cardsGrid');
+        try {
+            const response = await fetch('database.json');
+            allCards = await response.json();
+            applyFilters();
+        } catch (error) {
+            grid.innerHTML = '<div class="no-results">Impossible de charger les cartes. Vérifiez que database.json est disponible.</div>';
+            console.error("Erreur de chargement :", error);
+        }
+    }
 
-        // Afficher les cartes
-        function displayCards(cards) {
-            const grid = document.getElementById('cardsGrid');
-            
-            if (cards.length === 0) {
-                grid.innerHTML = '<div class="no-results">Aucune carte trouvée</div>';
-                return;
-            }
-            
-            grid.innerHTML = cards.map(card => `
-                <div class="card">  
-                    <img src="${card.image || 'placeholder.png'}" alt="${card.name}" class="card-image">
-                </div>
-            `).join('');
+    function getRarityClass(rarity) {
+        const map = {
+            'Commune': 'r-commune', 'Rare': 'r-rare', 'Épique': 'r-epique',
+            'Légendaire': 'r-legend', 'Mythique': 'r-mythique',
+            'Unique': 'r-unique', 'Divine': 'r-divine'
+        };
+        return map[rarity] || '';
+    }
+
+    function displayCards(cards) {
+        const grid = document.getElementById('cardsGrid');
+        const info = document.getElementById('resultsInfo');
+
+        info.textContent = `${cards.length} carte${cards.length !== 1 ? 's' : ''} trouvée${cards.length !== 1 ? 's' : ''}`;
+
+        if (cards.length === 0) {
+            grid.innerHTML = '<div class="no-results">Aucune carte trouvée</div>';
+            return;
         }
 
-        // Rechercher les cartes
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = allCards.filter(card => 
-                card.name.toLowerCase().includes(query) ||
-                (card.type && card.type.toLowerCase().includes(query))
-            );
-            displayCards(filtered);
+        grid.innerHTML = cards.map(card => `
+            <div class="dex-card" onclick="openModal('${card.image || 'placeholder.png'}', '${card.name}', '${card.rarity || ''}', '${card.category || ''}')">
+                <div class="dex-card-img-wrap">
+                    <img src="${card.image || 'placeholder.png'}" alt="${card.name}" loading="lazy">
+                </div>
+                <div class="dex-card-info">
+                    <div class="dex-card-name">${card.name}</div>
+                    ${card.rarity ? `<span class="dex-card-rarity ${getRarityClass(card.rarity)}">${card.rarity}</span>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function applyFilters() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const rarity = document.getElementById('rarityFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+
+        const filtered = allCards.filter(card => {
+            const matchSearch = card.name.toLowerCase().includes(term) || card.id?.toString().includes(term);
+            const matchRarity = !rarity || card.rarity === rarity;
+            const matchCategory = !category || card.category === category;
+            return matchSearch && matchRarity && matchCategory;
         });
 
-        // Charger au démarrage
-        loadCards();
-    </script>
+        displayCards(filtered);
+    }
+
+    function openModal(img, name, rarity, category) {
+        document.getElementById('modalImage').src = img;
+        document.getElementById('modalName').textContent = name;
+        document.getElementById('modalMeta').innerHTML =
+            `${rarity ? `<span class="dex-card-rarity ${getRarityClass(rarity)}">${rarity}</span>` : ''}
+             ${category ? `<span class="modal-category">${category}</span>` : ''}`;
+        document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('rarityFilter').addEventListener('change', applyFilters);
+    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    window.onload = loadCards;
+</script>
+
 </body>
 </html>
