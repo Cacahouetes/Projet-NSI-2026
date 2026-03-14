@@ -8,6 +8,7 @@ BASE_DIR = os.path.dirname(__file__)
 # Chemin vers la base de données SQLite
 DB_PATH = os.path.join(BASE_DIR, 'data', 'game.db')
 
+
 # template_folder → dossier où Flask cherche les fichiers HTML (render_template)
 # static_folder   → dossier où Flask sert les fichiers CSS, JS, images statiques
 app = Flask(__name__,
