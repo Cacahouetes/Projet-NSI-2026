@@ -176,6 +176,27 @@
                 image: '/cards/' + c.image_path.replace('Cards/', '')
             }));
 
+            // Tri par ordre de rareté (de la plus rare à la plus commune).
+            // RARITY_ORDER associe chaque rareté à un rang numérique.
+            // .sort() compare deux cartes a et b : si a est plus rare que b
+            // (rang plus petit), elle passe avant. À rang égal, on trie par
+            // nom alphabétique pour un affichage stable et prévisible.
+            const RARITY_ORDER = {
+                'Commune':     1,
+                'Rare':     2,
+                'Épique':   3,
+                'Légendaire': 4,
+                'Mythique':     5,
+                'Unique':       6,
+                'Divine':    7
+            };
+            allCards.sort((a, b) => {
+                const rankA = RARITY_ORDER[a.rarity] ?? 99;
+                const rankB = RARITY_ORDER[b.rarity] ?? 99;
+                if (rankA !== rankB) return rankA - rankB;
+                return a.name.localeCompare(b.name, 'fr');
+            });
+
             applyFilters(); // affiche toutes les cartes au démarrage
         } catch (error) {
             grid.innerHTML = '<div class="no-results">Impossible de charger les cartes depuis /api/cards — vérifiez que Flask tourne.</div>';

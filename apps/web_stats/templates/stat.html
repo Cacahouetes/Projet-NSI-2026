@@ -338,6 +338,15 @@
         // Si aucune donnée n'existe pour ce joueur, affiche un message vide.
         content.innerHTML += sectionTitle('Stats par rareté');
         if (rarity.length > 0) {
+            
+            // Tri par ordre de rareté (de la plus rare à la plus commune),
+            // même principe que dans le Card Dex : dictionnaire rang + .sort().
+            const RARITY_ORDER = {
+                'Divine': 1, 'Unique': 2, 'Mythique': 3,
+                'Légendaire': 4, 'Épique': 5, 'Rare': 6, 'Commune': 7
+            };
+            rarity.sort((a, b) => (RARITY_ORDER[a.rarity] ?? 99) - (RARITY_ORDER[b.rarity] ?? 99));
+
             // .map() crée une ligne <tr> par rareté, .join('') les concatène
             const rows = rarity.map(r => `
                 <tr>
