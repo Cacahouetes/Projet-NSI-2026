@@ -248,8 +248,10 @@
         // Statistiques ventilées par rareté (cartes obtenues / vendues / fusionnées)
         const rarity = query('SELECT * FROM PLAYER_RARITY_STATS WHERE player_id = ?', [playerId]);
 
-        // Nombre total de cartes actuellement en possession du joueur
-        const cards = query('SELECT COUNT(*) as cnt FROM PLAYER_CARDS WHERE player_id = ?', [playerId])[0] || {};
+        // Nombre total de cartes en possession (somme des quantités de chaque carte)
+        // SUM(quantity) additionne toutes les quantités, COUNT ne suffit plus
+        // car PLAYER_CARDS stocke maintenant une quantité par carte possédée
+        const cards = query('SELECT SUM(quantity) as cnt FROM PLAYER_CARDS WHERE player_id = ?', [playerId])[0] || {};
 
         // Nombre de cartes différentes découvertes (CardDex = encyclopédie personnelle)
         const carddex = query('SELECT COUNT(*) as cnt FROM PLAYER_CARDDEX WHERE player_id = ?', [playerId])[0] || {};
@@ -257,17 +259,18 @@
         // Nombre total de cartes dans le jeu (pour calculer le % de complétion)
         const totalCards = query('SELECT COUNT(*) as cnt FROM CARDS')[0] || {};
 
-        // Statistiques de fusion : total + nombre de fusions réussies
-        const fusions = query(
-            'SELECT COUNT(*) as total, SUM(success) as wins FROM PLAYER_FUSIONS WHERE player_id = ?',
-            [playerId]
-        )[0] || {};
+        // Statistiques de fusion : lues directement depuis PLAYER_STATS
+        // (plus besoin de requête sur PLAYER_FUSIONS, les totaux y sont agrégés)
+        const fusions = {
+            total: stats.fusions_attempted || 0,
+            wins:  stats.fusions_success   || 0
+        };
 
-        // Nombre de coffres (boosters) ouverts
-        const chests = query('SELECT COUNT(*) as cnt FROM CHEST_OPENINGS WHERE player_id = ?', [playerId])[0] || {};
+        // Coffres ouverts : directement dans PLAYER_STATS (colonne chests_opened)
+        const chests = { cnt: stats.chests_opened || 0 };
 
-        // Nombre de succès (achievements) débloqués
-        const achiev = query('SELECT COUNT(*) as cnt FROM PLAYER_ACHIEVEMENTS WHERE player_id = ?', [playerId])[0] || {};
+        // Succès débloqués : directement dans PLAYER_STATS (colonne achievements_unlocked)
+        const achiev = { cnt: stats.achievements_unlocked || 0 };
 
         // Pourcentage de complétion du CardDex, arrondi à l'entier le plus proche
         const dexPct = totalCards.cnt > 0
