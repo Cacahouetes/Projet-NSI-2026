@@ -26,27 +26,26 @@ while running:
     win.fill((60,48,39))   
 
     for event in pygame.event.get():
+        
+        if not level.player.isDead:
+            if event.type == pygame.MOUSEBUTTONDOWN and level.gun.currGunID != 2  and pygame.mouse.get_pressed()[0]:
+                level.NewBullet()
+            
+            if event.type == pygame.MOUSEWHEEL:
+                
+                if event.y == -1:
+                    level.gun.currGunID-=1
+                    if level.gun.currGunID <0:
+                        level.gun.currGunID = level.gun.unlockedGuns-1
+                    
+                elif event.y == 1:
+                    level.gun.currGunID+=1
+                    if level.gun.currGunID >= level.gun.unlockedGuns:
+                        level.gun.currGunID = 0
+
         if event.type == pygame.QUIT:
             running = False
-        
-        if event.type == pygame.MOUSEBUTTONDOWN and level.gun.currGunID != 2:
-            level.NewBullet()
-        
-        if event.type == pygame.MOUSEWHEEL:
             
-            if event.y == -1:
-                level.gun.currGunID-=1
-                if level.gun.currGunID <0:
-                    level.gun.currGunID = level.gun.unlockedGuns-1
-                
-            elif event.y == 1:
-                level.gun.currGunID+=1
-                if level.gun.currGunID >= level.gun.unlockedGuns:
-                    level.gun.currGunID = 0
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                pass
                 
     if  pygame.mouse.get_pressed()[0] and level.gun.currGunID == 2:
         level.NewBullet()
@@ -54,8 +53,6 @@ while running:
     level.update(dt)
     level.draw(win)
 
-    win.blit(font.render(f"Score: {level.player.score}", True, (222,222,222)), (600, 30))
-    win.blit(font.render(f"Wave: {level.waveN}", True, (222,222,222)), (300, 30))
     pygame.display.flip()
 pygame.quit()
 
@@ -66,6 +63,4 @@ get_point.wav
 get_health.wav
 get_new_gun.wav
 new_wave.wav
-
-
 """

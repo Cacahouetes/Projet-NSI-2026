@@ -7,12 +7,13 @@ class Entity(pygame.sprite.Sprite):
     def loadimg(self, path):
         return pygame.image.load(path).convert_alpha()
 
-    def __init__(self, clr, posx, posy, events):
+    def __init__(self, clr, posx, posy, events, isStrong):
         pygame.sprite.Sprite.__init__(self)
         
         self.eventman = events
-        self.type = 0 #0 == FOLLOW
+        self.isStrong = isStrong 
         self.clr = clr
+
         self.animdict = {
             "walk" : ["walk/ennemyWalk1.png", "walk/ennemyWalk2.png"],
             "hit" : ["hit/ennemyHit1.png", "hit/ennemyHit2.png", "hit/ennemyHit3.png", "hit/ennemyHit4.png", "hit/ennemyHit5.png"],
@@ -27,7 +28,7 @@ class Entity(pygame.sprite.Sprite):
             self.images_orig[anim] = []
             for i in range(len(self.animdict[anim])):
                 self.images[anim].append(self.loadimg("Assets/jeu arcade/ennemy/" + self.animdict[anim][i]))
-                self.images[anim][i] = pygame.transform.scale2x(self.images[anim][i])
+                self.images[anim][i] = pygame.transform.scale_by(self.images[anim][i], 3 if self.isStrong else 2)
                 self.images_orig[anim].append(self.images[anim][i])
         
         self.curranim = "walk" 
@@ -40,7 +41,7 @@ class Entity(pygame.sprite.Sprite):
         self.posY = posy
         self.velocity = [0,0]
         self.SPEED = 0.3
-        self.health = 1.00
+        self.health = 1.75 if self.isStrong else 1.00
 
         self.tick = 0
         self.r = 255
@@ -78,7 +79,7 @@ class Entity(pygame.sprite.Sprite):
             case self.states.ATTACK:
                 self.clr = (255,255,0)
                 if self.tick == 0 and not player.isDead:
-                    player.takedmg(0.06)
+                    player.takedmg(0.1 if self.isStrong else 0.06)
 
                 self.tick += 1
 

@@ -10,23 +10,46 @@ from tile import Tile
 from gun import Gun
 from math import sin, cos,ceil, sqrt
 from enum import Enum
+
 import random
 def loadimg(path):
         return pygame.image.load("Assets/jeu arcade/" + path).convert_alpha()
 class Level():
     
-
-    def __init__(self):
-        self.TILE_SIZE = 32 
-        self.scroll = pygame.math.Vector2(0,0)
+    def NewGame(self):
         self.ennemy_sprites = pygame.sprite.Group()
-        self.tile_sprites = pygame.sprite.Group()
+        
         self.bullet_sprites = pygame.sprite.Group()
         self.collectible_sprites = pygame.sprite.Group()
         self.ent_draw_sprites = pygame.sprite.Group()
         self.waveN = 0
 
         self.changeTick = 0 #temps depuis le dernier changement d'état en secondes
+        self.currState = self.lvlStates['NORMAL']
+
+        self.eventman = EventManager()
+        self.gun = Gun(self.eventman)
+        self.soundman = SoundManager(self.eventman)
+        self.player = Player(300, 150, self.eventman)
+        self.scrfx = ScreenEffects(self.eventman, self)
+
+        #relier les objets au système d'evenements pour qu'ils les captent
+        self.eventman.eventObjects.append(self.soundman)
+        self.eventman.eventObjects.append(self.player)
+        self.eventman.eventObjects.append(self.scrfx)
+        self.eventman.eventObjects.append(self.scrfx)
+        self.eventman.eventObjects.append(self.gun)
+        self.eventman.eventObjects.append(self)
+
+        self.ent_draw_sprites.add(self.player)
+
+        self.NewWave()
+
+    def __init__(self):
+        self.TILE_SIZE = 32 
+        self.scroll = pygame.math.Vector2(0,0)
+        self.tile_sprites = pygame.sprite.Group()
+
         self.lvlStates = Enum('lvlState', [('NORMAL', 0), ('WAVE_END', 1),('WAVE_START', 2)])
         self.currState = self.lvlStates['NORMAL']
 
@@ -37,24 +60,7 @@ class Level():
         self.LoadTileTexts()
         self.LoadTileSprites()
         
-        self.eventman = EventManager()
-        self.gun = Gun(self.eventman)
-        self.soundman = SoundManager(self.eventman)
-        self.player = Player(300, 50, self.eventman)
-        self.scrfx = ScreenEffects()
-
-        #relier les objets au système d'evenements pour qu'ils les captent
-        self.eventman.eventObjects.append(self.soundman)
-        self.eventman.eventObjects.append(self.player)
-        self.eventman.eventObjects.append(self.scrfx)
-        self.eventman.eventObjects.append(self.gun)
-        self.eventman.eventObjects.append(self)
-
-        self.ent_draw_sprites.add(self.player)
-
-        self.NewWave()
-        
-        self.newCollectible(400, 500)
+        self.NewGame()
     
     def readLevelFile(self, path):
         niveau = open(path, "r")
@@ -69,8 +75,8 @@ class Level():
                     rowlist.append(int(tile))
             self.tiles.append(rowlist)
 
-    def newEntity(self, xpos):
-        newent = Entity((xpos%255, 200,200), xpos, 0, self.eventman)
+    def newEntity(self, xpos, isStrong):
+        newent = Entity((xpos%255, 200,200), xpos, 150, self.eventman, isStrong)
         newent.type = 0
         self.ennemy_sprites.add(newent)
         self.ent_draw_sprites.add(newent)
@@ -94,9 +100,9 @@ class Level():
     def newCollectible(self, xpos, ypos):
         val=0
         rand=random.randint(0,9)
-        if rand >=4: #30% de probabilité
+        if rand >=8: #30% de probabilité
             rand = random.randint(0,9)
-            if rand >= 7 and self.gun.unlockedGuns!=3: #??% de probabilité
+            if rand >= 8 and self.gun.unlockedGuns!=3: #??% de probabilité
                 if self.gun.unlockedGuns==1:
                     val=2 #nouv. arme fly
                 else:
@@ -168,7 +174,8 @@ class Level():
                 self.eventman.broadcast(self.eventman.evts['PLAYER_GET_NEW_AK'])
             colc_coll.kill()
 
-    def isAllDead(self) -> bool: #True si tous les ennemis sont morts, sinon False
+    def isAllDead(self) -> bool:
+        """True si tous les ennemis sont morts, sinon False. Servi pour le fonctionnement des vagues"""
         alldead = True
         for enn in self.ennemy_sprites:
             if enn.state.value != enn.states['DEAD'].value:
@@ -176,20 +183,7 @@ class Level():
         return alldead
 
     def update(self, dt):
-        match self.currState:
-            case self.lvlStates.NORMAL:
-                if self.isAllDead():
-                    self.eventman.broadcast(self.eventman.evts['WAVE_END'])
-
-            case self.lvlStates.WAVE_START:
-                pass
-                
-            case self.lvlStates.WAVE_END:
-                
-                if self.changeTick > 4:
-                    self.eventman.broadcast(self.eventman.evts['NEW_WAVE'])
-
-
+        
         self.scroll.x += (self.player.posX - self.scroll.x - 1280//2)//10
         self.scroll.y += (self.player.posY - self.scroll.y - 786//2)//5
 
@@ -204,13 +198,35 @@ class Level():
         self.scrfx.update()
         self.collectible_sprites.update(self.scroll, dt)
         self.changeTick += dt/1000
+    
+        match self.currState:
+            case self.lvlStates.NORMAL:
+                if self.isAllDead():
+                    self.eventman.broadcast(self.eventman.evts['WAVE_END'])
+
+            case self.lvlStates.WAVE_START:
+                pass
+                
+            case self.lvlStates.WAVE_END:
+                
+                if self.changeTick > 4:
+                    self.eventman.broadcast(self.eventman.evts['NEW_WAVE'])
+        keys = pygame.key.get_pressed()
+        if self.player.isDead and keys[pygame.K_r]:
+            self.NewGame()
 
     def NewWave(self):
         self.waveN += 1
-        for i in range(ceil(sqrt(self.waveN*8))):
-            self.newEntity(random.randrange(100,2500))
-        
+        ennemyNum = ceil(sqrt(self.waveN*8)) #vitesse d'augmentation des ennemis qui ralentit au fil des vagues
+        strongEnnemyNum = ceil(0.1*(self.waveN+3)**2 - (self.waveN+3)+2) #fonction du second degré (enfin les maths qui servent à une chose), a un moment il dépasse le nombre d'ennemis moyens
+        strongEnnemyNum = min(strongEnnemyNum, ennemyNum)
 
+        for i in range(strongEnnemyNum):
+            self.newEntity(random.randrange(100,2500), True)
+        
+        for i in range(ennemyNum-strongEnnemyNum):
+            self.newEntity(random.randrange(100,2500), False)
+    
     def eventGet(self, event):
         if event.value == self.eventman.evts['WAVE_END'].value:
             self.changeTick = 0
@@ -228,13 +244,15 @@ class Level():
         self.bullet_sprites.draw(win)
 
         #-----GUI-----
+
         #dessiner barre de santé
-        pygame.draw.rect(win, (255,0,0), pygame.Rect(15,15,200,50))
-        pygame.draw.rect(win, (0,255,0), pygame.Rect(15,15,200*self.player.health, 50))
+        pygame.draw.rect(win, (93,49,49), pygame.Rect(15,15,200,50))
+        pygame.draw.rect(win, (55,101,54), pygame.Rect(15,15,200*self.player.health, 50))
 
-        #dessiner le pistolet
-        self.gun.draw(win, self.player, self.player.msPlDir*180/3.14159265)
-
+        if not self.player.isDead:
+            #dessiner le pistolet (si le joueur n'est pas mort)
+            self.gun.draw(win, self.player, self.player.msPlDir*180/3.14159265)
+           
         win.blit(self.scrfx.image, self.scrfx.rect)
 
         #dessiner ui pistolets

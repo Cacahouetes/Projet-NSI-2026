@@ -1,9 +1,9 @@
 import pygame
+import base64
 from math import ceil, atan2, cos, sin
 class Player(pygame.sprite.Sprite):
     def loadimg(self, path):
         return pygame.image.load(path).convert_alpha()
-    
     
     def __init__(self, posx, posy, evts):
         pygame.sprite.Sprite.__init__(self)
@@ -30,7 +30,7 @@ class Player(pygame.sprite.Sprite):
                 self.images_orig[anim].append(self.images[anim][i])
         
         self.curranim = "idle" #remplacer ça par un enum?
-        self.animspd = 10
+        self.animspd = 10 #vitesse des animations 
         self.image = self.images["idle"][0]
         self.rect = self.image.get_rect()
         self.posX = posx
@@ -39,10 +39,25 @@ class Player(pygame.sprite.Sprite):
         self.jumping = False
         self.SPEED = 0.6
         self.tick = 0
-
+        
         self.score = 0
-
         self.msPlDir = 0
+
+        self.GetScore()
+    
+    def GetScore(self):
+        with open("Assets/jeu arcade/score.txt", "r") as f:
+            txt = f.readline()
+            encoded = base64.b64decode(txt.encode("ascii"))
+
+            self.score = int(base64.standard_b64decode(encoded).decode("ascii")) #utilisation du base 64 pour rendre la triche un peu plus difficile
+    
+    def PutScore(self):
+        with open("Assets/jeu arcade/score.txt", "w") as f:
+            txt = str(self.score)
+            encoded = base64.b64encode(txt.encode("ascii"))
+
+            f.write(base64.standard_b64encode(encoded).decode("ascii"))
 
     def update(self, delta, tileGroup, scroll):
         self.velxbefore = abs(self.velocity[0])
@@ -61,6 +76,8 @@ class Player(pygame.sprite.Sprite):
                 self.eventman.broadcast(self.eventman.evts['PLAYER_WALK_STOP'])
                 self.eventman.broadcast(self.eventman.evts['PLAYER_JUMP'])
                 self.jumping = True
+        else:
+            self.tick = 0
     
         self.movewCollision(tileGroup, scroll, delta)
         self.updMousePos()
@@ -179,6 +196,7 @@ class Player(pygame.sprite.Sprite):
         if not self.isDead:
             if event.value == self.eventman.evts['PLAYER_GET_PT'].value:
                 self.score += 10
+                self.PutScore()
             
             if event.value == self.eventman.evts['PLAYER_GET_HEALTH'].value:
                 self.health = min(1.0,self.health+0.2) 
