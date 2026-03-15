@@ -19,28 +19,36 @@ class MenuScene(BaseScene):
         self._build_ui()
 
     def _build_ui(self):
-        f_title = self.font("title", 28)
-        f_body  = self.font("body",  20)
-        cx      = self.W // 2
+        f_body = self.font("body", 19)
 
-        # Boutons de navigation centrés
-        btn_w, btn_h = 280, 58
-        gap          = 18
-        start_y      = 280
+        # Grille 2 colonnes x 4 lignes (7 boutons + quitter)
+        btn_w   = 280
+        btn_h   = 52
+        gap_x   = 24
+        gap_y   = 14
+        cols    = 2
+        start_y = 240
+        # Centre les deux colonnes
+        total_w = cols * btn_w + gap_x
+        ox      = self.W // 2 - total_w // 2
 
         self._buttons = []
         entries = [
-            ("Ouvrir un coffre",  self._go_chest),
-            ("Inventaire",        self._go_inventory),
-            ("Shop",              self._go_shop),
-            ("Fusion",            self._go_fusion),
-            ("CardDex",           self._go_carddex),
-            ("Recompense daily",  self._go_daily),
+            ("Ouvrir un coffre", self._go_chest),
+            ("Inventaire",       self._go_inventory),
+            ("Shop",             self._go_shop),
+            ("Fusion",           self._go_fusion),
+            ("CardDex",          self._go_carddex),
+            ("Recompense daily", self._go_daily),
+            ("Succes",           self._go_achievements),
         ]
         for i, (label, cb) in enumerate(entries):
-            y = start_y + i * (btn_h + gap)
+            col = i % cols
+            row = i // cols
+            x   = ox + col * (btn_w + gap_x)
+            y   = start_y + row * (btn_h + gap_y)
             self._buttons.append(
-                Button((cx - btn_w // 2, y, btn_w, btn_h),
+                Button((x, y, btn_w, btn_h),
                        label, f_body, on_click=cb, radius=12)
             )
 
@@ -79,6 +87,10 @@ class MenuScene(BaseScene):
     def _go_daily(self):
         from scenes.daily_scene import DailyScene
         self.goto(DailyScene)
+
+    def _go_achievements(self):
+        from scenes.achievements_scene import AchievementsScene
+        self.goto(AchievementsScene)
 
     # ── Boucle ────────────────────────────────────────────────────────────────
     def handle_events(self, events):

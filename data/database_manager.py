@@ -609,14 +609,14 @@ def db_register_shop_purchase(player_id: int, card, price: int, new_coins: int):
 # ═══════════════════════════════════════════════════════════════════════════════
 # Daily rewards
 # ═══════════════════════════════════════════════════════════════════════════════
-
+ 
 def db_update_daily(player_id: int, new_stats_dict: dict,
                     reward_coins: int, reward_card=None) -> bool:
     conn = get_connection()
     try:
         with conn:
             cursor = conn.cursor()
-
+ 
             cursor.execute("""
                 UPDATE PLAYER_STATS
                 SET coins                = ?,
@@ -637,19 +637,23 @@ def db_update_daily(player_id: int, new_stats_dict: dict,
                 new_stats_dict['total_claims'],
                 player_id,
             ))
-
+ 
             card_id = reward_card.card_id if reward_card else None
+            # day_index est 0-based (0=Jour1 … 6=Jour7)
+            # Si absent du dict (ancienne version), calculer depuis current_streak
+            day_index = new_stats_dict.get('day_index',
+                        (new_stats_dict['current_streak'] - 1) % 7)
             cursor.execute("""
                 INSERT INTO DAILY_HISTORY (player_id, day_index, coins, card_id, claimed_at)
                 VALUES (?, ?, ?, ?, ?)
             """, (
                 player_id,
-                new_stats_dict['current_streak'],
+                day_index,
                 reward_coins,
                 card_id,
                 new_stats_dict['last_ts'],
             ))
-
+ 
             # Carte de récompense dans la même transaction
             if reward_card and reward_card.card_id is not None:
                 _internal_add_to_inventory(cursor, player_id, [reward_card])
@@ -658,7 +662,7 @@ def db_update_daily(player_id: int, new_stats_dict: dict,
                     SET cards_obtained = cards_obtained + 1
                     WHERE player_id = ?
                 """, (player_id,))
-
+ 
         return True
     except sqlite3.Error as e:
         raise Exception(f"Erreur db_update_daily : {e}")

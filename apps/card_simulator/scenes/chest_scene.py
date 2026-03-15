@@ -327,6 +327,7 @@ class ChestScene(BaseScene):
         self._flash_alpha  = 0
         self._shake_timer  = 200   # ms de shake
 
+
         # Générer le coffre en arrière-plan
         self._loading = True
         t = threading.Thread(target=self._generate_chest, daemon=True)
@@ -422,19 +423,22 @@ class ChestScene(BaseScene):
 
     def _update_reveal(self, dt):
         all_done = True
+        prev_done = [cr.done for cr in self._card_reveals]
         for cr in self._card_reveals:
             cr.update(dt)
             if not cr.done:
                 all_done = False
+        # Son flip pour chaque carte qui vient de se retourner
+        for i, cr in enumerate(self._card_reveals):
+            if cr.done and not prev_done[i]:
+                rarity_val = (cr.card.rarity.value
+                              if hasattr(cr.card.rarity, "value") else 0)
+                self.assets.play("sfx_card_flip", 0.5)
 
         if all_done and not self._reveal_done:
             self._reveal_done = True
             self._build_recap_buttons()
-            # Son spécial si Divine dans le résultat
-            for c in self._result_cards:
-                if c.rarity == Rarity.DIVINE:
-                    self.assets.play("sfx_card_epic", 1.0)
-                    break
+
 
         # les boutons n'ont pas de methode update, rien a faire ici
 
@@ -498,7 +502,7 @@ class ChestScene(BaseScene):
                    color=Colors.ORANGE,
                    on_click=self._sell_commons),
             Button((self.W // 2 + 120, cy, 200, 48),
-                   "← Menu", f,
+                   "< Menu", f,
                    on_click=self._go_back),
         ]
 
@@ -535,6 +539,7 @@ class ChestScene(BaseScene):
         for a in new_ach:
             self.manager.show_achievement(a)
 
+        self.assets.play("sfx_coin", 0.7)
         self.manager.show_toast(f"+{gained} pieces  Communes vendues", Colors.GOLD)
         # Griser les cartes communes dans le reveal
         for cr in self._card_reveals:

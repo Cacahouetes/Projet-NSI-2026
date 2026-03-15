@@ -390,7 +390,7 @@ class InventoryScene(BaseScene):
 
         self._btn_sell_sel = Button(
             (GRID_LEFT, self.H - BOTTOM_BAR + 12, 220, 46),
-            "Vendre selection (0 pièces)", f,
+            "Vendre selection (0 pièce)", f,
             color=Colors.ORANGE, on_click=self._sell_selected,
             radius=10
         )
