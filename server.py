@@ -91,7 +91,7 @@ def serve_data(filename):
 
 
 # LANCEMENT DU SERVEUR
-# Ce bloc ne s'exécute que si on lance directement "python server.py",
+# Ce bloc ne s'exécute que si on lance directement "python server.py" dans le terminal,
 # pas si server.py est importé comme module par un autre script.
 #
 # port=5000   → adresse d'accès : http://localhost:5000
