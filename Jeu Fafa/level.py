@@ -9,6 +9,7 @@ from bullet import Bullet
 from tile import Tile
 from gun import Gun
 from math import sin, cos,ceil, sqrt
+from enum import Enum
 import random
 def loadimg(path):
         return pygame.image.load("Assets/jeu arcade/" + path).convert_alpha()
@@ -24,7 +25,11 @@ class Level():
         self.collectible_sprites = pygame.sprite.Group()
         self.ent_draw_sprites = pygame.sprite.Group()
         self.waveN = 0
-        
+
+        self.changeTick = 0 #temps depuis le dernier changement d'état en secondes
+        self.lvlStates = Enum('lvlState', [('NORMAL', 0), ('WAVE_END', 1),('WAVE_START', 2)])
+        self.currState = self.lvlStates['NORMAL']
+
         self.tiles = []
         self.tiles_img = [loadimg("bg.png"), loadimg("fg.png"), loadimg("fgright.png"), loadimg("fgleft.png")]
 
@@ -163,20 +168,33 @@ class Level():
                 self.eventman.broadcast(self.eventman.evts['PLAYER_GET_NEW_AK'])
             colc_coll.kill()
 
+    def isAllDead(self) -> bool: #True si tous les ennemis sont morts, sinon False
+        alldead = True
+        for enn in self.ennemy_sprites:
+            if enn.state.value != enn.states['DEAD'].value:
+                alldead = False 
+        return alldead
+
     def update(self, dt):
+        match self.currState:
+            case self.lvlStates.NORMAL:
+                if self.isAllDead():
+                    self.eventman.broadcast(self.eventman.evts['WAVE_END'])
+
+            case self.lvlStates.WAVE_START:
+                pass
+                
+            case self.lvlStates.WAVE_END:
+                
+                if self.changeTick > 4:
+                    self.eventman.broadcast(self.eventman.evts['NEW_WAVE'])
+
+
         self.scroll.x += (self.player.posX - self.scroll.x - 1280//2)//10
         self.scroll.y += (self.player.posY - self.scroll.y - 786//2)//5
 
         self.tile_sprites.update(self.scroll)
         self.player.update(dt, self.tile_sprites, self.scroll)
-
-        alldead = True
-        for enn in self.ennemy_sprites:
-            if enn.state.value != enn.states['DEAD'].value:
-                alldead = False 
-                break
-        if alldead:
-            self.eventman.broadcast(self.eventman.evts['NEW_WAVE'])
             
         self.updSprites(dt)
         self.updPlayer()
@@ -185,6 +203,7 @@ class Level():
 
         self.scrfx.update()
         self.collectible_sprites.update(self.scroll, dt)
+        self.changeTick += dt/1000
 
     def NewWave(self):
         self.waveN += 1
@@ -193,8 +212,14 @@ class Level():
         
 
     def eventGet(self, event):
+        if event.value == self.eventman.evts['WAVE_END'].value:
+            self.changeTick = 0
+            self.currState = self.lvlStates['WAVE_END']
+        
         if event.value == self.eventman.evts['NEW_WAVE'].value:
             self.NewWave()
+            self.changeTick = 0
+            self.currState = self.lvlStates['NORMAL']
 
     def draw(self, win):
         self.tile_sprites.draw(win)
@@ -209,5 +234,15 @@ class Level():
 
         #dessiner le pistolet
         self.gun.draw(win, self.player, self.player.msPlDir*180/3.14159265)
-        
+
         win.blit(self.scrfx.image, self.scrfx.rect)
+
+        #dessiner ui pistolets
+        for i in range(self.gun.unlockedGuns):
+            img = pygame.transform.scale_by(self.gun.imgs[i], 1.5)
+            alpha = 180 if i==self.gun.currGunID else 90
+            img.fill((255, 255, 255, alpha), None, pygame.BLEND_RGBA_MULT)
+
+            win.blit(img, (32 + i*128, 48))
+
+        

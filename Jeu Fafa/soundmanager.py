@@ -16,6 +16,10 @@ class SoundManager:
 
         self.walksfx = mksnd("walking", 0.8)
         self.jumpsfx = mksnd("jump", 0.4)
+        
+        self.newavesfx = mksnd("nor", 10.0)
+        self.wavendsfx = mksnd("nor", 10)
+
         self.dedsfx = mksnd("mort", 0.6)
 
     def eventGet(self, event):
@@ -55,3 +59,11 @@ class SoundManager:
         elif event.value == self.eventman.evts['PLAYER_DEAD'].value:
             self.dedsfx.stop()
             self.dedsfx.play()
+        
+        elif event.value == self.eventman.evts['WAVE_END'].value:
+            self.wavendsfx.stop()
+            self.wavendsfx.play()
+        
+        elif event.value == self.eventman.evts['NEW_WAVE'].value:
+            self.newavesfx.stop()
+            self.newavesfx.play()

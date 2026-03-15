@@ -18,7 +18,7 @@ clock = pygame.time.Clock()
 level = Level()
 
 pygame.mixer.music.load('Assets/jeu arcade/musique/onlyvoicemusic.mp3')
-pygame.mixer.music.play(-1)
+pygame.mixer.music.play(-1) #-1 pour mettre la musique en boucle
 
 while running:
     dt = clock.tick(60) 
@@ -60,11 +60,12 @@ while running:
 pygame.quit()
 
 """
-player avec des armes 
-doit eliminer les ennemis 
-
-
-musique:
+change_gun.wav
+jump.wav
+get_point.wav
+get_health.wav
+get_new_gun.wav
+new_wave.wav
 
 
 """
