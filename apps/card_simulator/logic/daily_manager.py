@@ -69,16 +69,38 @@ class DailyRewardManager:
         player.stats.last_daily_timestamp = now
         player.stats.daily_claims_total  += 1
 
-        # ── Sélection de la récompense (cycle de 7 jours) ──────────────────
+        # ── Sélection de la récompense (cycle de 7 jours, 0-based) ───────────
         reward_index = (player.stats.daily_current_streak - 1) % len(DAILY_REWARDS)
-        reward       = DAILY_REWARDS[reward_index]
+        reward_template = DAILY_REWARDS[reward_index]
+
+        # ── Résolution de la vraie carte AVANT la DB ───────────────────────
+        # Les cartes dans DAILY_REWARDS ont card_id=None (placeholder).
+        # On tire une vraie carte via CardRepository maintenant.
+        resolved_card = None
+        if reward_template.card is not None:
+            try:
+                from card_repository import CardRepository
+                repo = CardRepository()
+                resolved_card = repo.get_random_card(reward_template.card.rarity)
+            except Exception as e:
+                print(f"[DailyManager] Impossible de résoudre la carte : {e}")
+
+        # Créer un reward avec la vraie carte résolue
+        # On stocke reward_index dans l'objet pour que la scène
+        # sache exactement quel slot (0-6) vient d'être réclamé.
+        reward = DailyReward(
+            coins=reward_template.coins,
+            card=resolved_card,
+            description=reward_template.description
+        )
+        reward.day_index = reward_index   # 0-based, ajout dynamique
 
         # ── Application des pièces ─────────────────────────────────────────
-        player.coins               += reward.coins
-        player.stats.coins_earned  += reward.coins   # ← correction de la faute "coin_earned"
-        player._update_max_coins()   # snapshot après réception des pièces
+        player.coins              += reward.coins
+        player.stats.coins_earned += reward.coins
 
         # ── Sauvegarde en base ─────────────────────────────────────────────
+        # day_index = 0-based (0 = Jour 1, 6 = Jour 7)
         stats_to_save = {
             'coins':          player.coins,
             'coins_earned':   player.stats.coins_earned,
@@ -87,21 +109,21 @@ class DailyRewardManager:
             'best_streak':    player.stats.daily_best_streak,
             'streak_breaks':  player.stats.daily_streak_breaks,
             'total_claims':   player.stats.daily_claims_total,
+            'day_index':      reward_index,   # 0-based, correspond à DAILY_REWARDS
         }
 
         import database_manager
         database_manager.db_update_daily(player.id, stats_to_save, reward.coins, reward.card)
 
-        # ── Application de la carte ────────────────────────────────────────
-        if reward.card:
+        # ── Application de la carte en mémoire ────────────────────────────
+        if reward.card and reward.card.card_id is not None:
             player.inventory.add_card(reward.card)
             player.carddex.add_card(reward.card)
             player.stats.cards_obtained += 1
-            player.stats.cards_by_rarity[reward.card.rarity]     += 1
+            player.stats.cards_by_rarity[reward.card.rarity] += 1
             if reward.card.category:
                 player.stats.cards_by_category[reward.card.category] += 1
 
-        # ── Vérification des succès ────────────────────────────────────────
-        player.check_achievements()
-
+        # Note : ne pas appeler player.check_achievements() ici.
+        # La scène (daily_scene.py) s'en charge avec db_sync_achievements.
         return reward

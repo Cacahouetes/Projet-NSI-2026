@@ -296,6 +296,7 @@ class FusionScene(BaseScene):
         self._phase      = self.PHASE_FUSING
         self._anim_timer = 0
         self._particles  = []
+        self.assets.play("sfx_fusion_start", 0.8)
 
     def _do_fusion(self):
         """Exécute la fusion via FusionSystem."""
@@ -371,6 +372,12 @@ class FusionScene(BaseScene):
         msg = (f"Fusion reussie ! Tu obtiens une carte {RESULT_LABELS.get(rarity, '???')}."
                if success else
                f"Fusion echouee. Tes 3 cartes ont ete consommees.")
+
+        # Sons de résultat
+        if success:
+            self.assets.play("sfx_fusion_success", 1.0)
+        else:
+            self.assets.play("sfx_fusion_fail", 0.9)
 
         return {
             "success":          success,
@@ -579,7 +586,7 @@ class FusionScene(BaseScene):
             t2 = f.render(f"Taux de reussite : {rate}%", True, color_rate)
             self.screen.blit(t2, t2.get_rect(centerx=col_cx, y=line_y + gap))
 
-            t3 = f.render(f"Cout : {cost} pc", True, Colors.GOLD)
+            t3 = f.render(f"Cout : {cost} pièces", True, Colors.GOLD)
             self.screen.blit(t3, t3.get_rect(centerx=col_cx, y=line_y + gap * 2))
 
             t4 = fy.render(f"Resultat possible : {res}", True, Colors.TEXT_GRAY)

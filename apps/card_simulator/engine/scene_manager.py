@@ -192,6 +192,7 @@ class SceneManager:
                               self.assets.font("body", 13),
                               self.WIDTH, self.assets)
         )
+        self.assets.play("sfx_achievement", 0.9)
 
     # ── Boucle principale ─────────────────────────────────────────────────────
 

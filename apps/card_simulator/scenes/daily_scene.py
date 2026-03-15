@@ -98,6 +98,7 @@ class DailyScene(BaseScene):
         self._claimed_this_session = False
         self._claim_anim_t = 0.0      # 0→1 animation après réclamation
         self._claimed_reward = None    # DailyReward récemment réclamé
+        self._claimed_day_index = -1   # index 0-based du slot réclamé
         self._pulse_t = 0.0           # timer pulsation case active
 
         self._coin_display = CoinDisplay(
@@ -129,28 +130,54 @@ class DailyScene(BaseScene):
     # ── Logique ───────────────────────────────────────────────────────────────
 
     def _current_day_index(self) -> int:
-        """Index (0-6) de la case correspondant au streak actuel."""
+        """
+        Index 0-based (0=Jour1 … 6=Jour7) de la case active.
+
+        Doit prédire EXACTEMENT ce que daily_manager.claim_reward() va faire :
+          - Si reset (>= 2 jours sans claim) : prochain streak = 1  → index = 0
+          - Sinon                            : prochain streak += 1  → index = streak % 7
+        """
         if not self.player:
             return 0
-        streak = self.player.stats.daily_current_streak
-        return (streak - 1) % 7 if streak > 0 else 0
+
+        # Après un claim dans cette session : valeur exacte renvoyée par daily_manager
+        if self._claimed_this_session and self._claimed_day_index >= 0:
+            return self._claimed_day_index
+
+        streak    = self.player.stats.daily_current_streak
+        can_claim = self._manager_daily.can_claim(self.player)
+
+        if can_claim:
+            import time
+            from daily_manager import DAY_DURATION
+            elapsed = time.time() - self.player.stats.last_daily_timestamp
+
+            # Reset si > 48h sans claim (même condition que daily_manager)
+            if self.player.stats.last_daily_timestamp > 0 and elapsed >= DAY_DURATION * 2:
+                # Prochain streak = 1 → index = 0 (Jour 1)
+                return 0
+            else:
+                # Prochain streak = streak + 1
+                return (streak + 1 - 1) % 7   # = streak % 7
+        else:
+            # Déjà réclamé aujourd'hui : dernier index réclamé
+            return max(0, (streak - 1) % 7)
 
     def _slot_state(self, slot_idx: int) -> str:
         """
         Retourne l'état d'un slot :
           'claimed'  — déjà réclamé dans ce cycle
-          'active'   — le jour actuel (réclamable ou non)
+          'active'   — le jour à réclamer (pulsation dorée)
           'locked'   — jour futur
         """
         if not self.player:
             return 'locked'
 
-        can_claim  = self._manager_daily.can_claim(self.player)
-        curr       = self._current_day_index()
-        streak     = self.player.stats.daily_current_streak
+        can_claim = self._manager_daily.can_claim(self.player)
+        curr      = self._current_day_index()   # index 0-based du jour actif
 
         if can_claim:
-            # Peut réclamer : jours < curr sont réclamés, curr = actif, > curr = locked
+            # curr = index du prochain claim
             if slot_idx < curr:
                 return 'claimed'
             elif slot_idx == curr:
@@ -158,11 +185,14 @@ class DailyScene(BaseScene):
             else:
                 return 'locked'
         else:
-            # Déjà réclamé aujourd'hui : jours <= curr sont réclamés, > curr = locked
-            if slot_idx <= curr:
+            # curr = index du dernier claim (déjà réclamé)
+            if slot_idx < curr:
                 return 'claimed'
+            elif slot_idx == curr:
+                return 'claimed'   # réclamé aujourd'hui → grisé avec coche
             else:
                 return 'locked'
+
 
     # ── Navigation ────────────────────────────────────────────────────────────
 
@@ -180,17 +210,20 @@ class DailyScene(BaseScene):
 
         try:
             reward = self._manager_daily.claim_reward(self.player)
-            self._claimed_reward = reward
+            self._claimed_reward    = reward
+            self._claimed_day_index = getattr(reward, 'day_index', 0)  # index 0-based réel
             self._claimed_this_session = True
             self._claim_anim_t = 0.0
 
             # Synchroniser achievements
+            # daily_manager ne les vérifie plus → on le fait ici avec accès DB
             import database_manager as db
             db.db_update_max_coins(self.player.id, self.player.stats.max_coins_held)
             new_ach = self.player.check_achievements()
-            db.db_sync_achievements(self.player.id, new_ach)
-            for a in new_ach:
-                self.manager.show_achievement(a)
+            if new_ach:
+                db.db_sync_achievements(self.player.id, new_ach)
+                for a in new_ach:
+                    self.manager.show_achievement(a)
 
             # Lancer les particules
             cx = self.W // 2
@@ -202,6 +235,7 @@ class DailyScene(BaseScene):
                 )
 
             self.assets.play("sfx_daily")
+            self.assets.play("sfx_coin", 0.6)
 
         except ValueError:
             pass
@@ -319,27 +353,39 @@ class DailyScene(BaseScene):
                 # Icône pièce ou carte
                 mid_y = rect.y + 55
                 if reward.card:
-                    # Petit aperçu de la rareté (carré coloré)
                     rname = (reward.card.rarity.name
                              if hasattr(reward.card.rarity, "name")
                              else str(reward.card.rarity))
-                    rc    = Colors.RARITY.get(rname, Colors.BORDER)
-                    card_preview = pygame.Surface((60, 84), pygame.SRCALPHA)
-                    pygame.draw.rect(card_preview, (*rc, 180),
-                                     (0, 0, 60, 84), border_radius=6)
-                    pygame.draw.rect(card_preview, (*rc, 255),
-                                     (0, 0, 60, 84), 2, border_radius=6)
-                    # Point d'interrogation si locked ou silhouette
-                    fq = pygame.font.SysFont("freesansbold", 20)
-                    q  = fq.render("?", True, (255, 255, 255))
-                    card_preview.blit(q, q.get_rect(center=(30, 42)))
-                    self.screen.blit(card_preview,
-                                     (rect.centerx - 30, mid_y))
-                    # Label rareté
-                    rl = RARITY_LABELS.get(rname.upper(), rname)
+                    rc  = Colors.RARITY.get(rname, Colors.BORDER)
+                    rl  = RARITY_LABELS.get(rname.upper(), rname)
+                    cw, ch = 60, 84
+                    # Afficher l'image si la carte a été résolue (card_id != None)
+                    if (self._claimed_this_session and i == self._current_day_index()
+                            and self._claimed_reward and self._claimed_reward.card
+                            and self._claimed_reward.card.card_id is not None
+                            and self._claimed_reward.card.image_path):
+                        # Vraie carte révélée après claim
+                        img = self.assets.card_image(
+                            self._claimed_reward.card.image_path, (cw, ch))
+                        self.screen.blit(img, (rect.centerx - cw // 2, mid_y))
+                        pygame.draw.rect(self.screen, rc,
+                                         (rect.centerx - cw // 2, mid_y, cw, ch),
+                                         2, border_radius=4)
+                    else:
+                        # Aperçu mystère (carré coloré + ?)
+                        card_preview = pygame.Surface((cw, ch), pygame.SRCALPHA)
+                        pygame.draw.rect(card_preview, (*rc, 180),
+                                         (0, 0, cw, ch), border_radius=6)
+                        pygame.draw.rect(card_preview, (*rc, 255),
+                                         (0, 0, cw, ch), 2, border_radius=6)
+                        fq = pygame.font.SysFont("freesansbold", 20)
+                        q  = fq.render("?", True, (255, 255, 255))
+                        card_preview.blit(q, q.get_rect(center=(cw // 2, ch // 2)))
+                        self.screen.blit(card_preview,
+                                         (rect.centerx - cw // 2, mid_y))
                     tr = f_rar.render(rl, True, rc)
                     self.screen.blit(tr, tr.get_rect(
-                        centerx=rect.centerx, y=mid_y + 90))
+                        centerx=rect.centerx, y=mid_y + ch + 6))
                 else:
                     # Cercle doré = pièce
                     pygame.draw.circle(self.screen, Colors.GOLD,
@@ -347,7 +393,7 @@ class DailyScene(BaseScene):
                     pygame.draw.circle(self.screen, (200, 150, 20),
                                        (rect.centerx, mid_y + 30), 24, 2)
                     font_pc = pygame.font.SysFont("freesansbold", 11)
-                    pc = font_pc.render("pc", True, (40, 30, 10))
+                    pc = font_pc.render("pièces", True, (40, 30, 10))
                     self.screen.blit(pc, pc.get_rect(center=(rect.centerx, mid_y + 30)))
 
                 # Valeur pièces
@@ -438,13 +484,18 @@ class DailyScene(BaseScene):
         t1.set_alpha(alpha)
         self.screen.blit(t1, t1.get_rect(centerx=self.W // 2, y=py + 14))
 
-        desc = f"+{reward.coins} pc"
+        desc = f"+{reward.coins} pièces"
         if reward.card:
             rname = (reward.card.rarity.name
                      if hasattr(reward.card.rarity, "name")
                      else str(reward.card.rarity))
             rl    = RARITY_LABELS.get(rname.upper(), rname)
-            desc += f"  +  carte {rl}"
+            # Afficher le vrai nom si disponible, sinon juste la rareté
+            card_name = reward.card.name if reward.card.name and reward.card.name != "???" else None
+            if card_name:
+                desc += f"  +  {card_name} ({rl})"
+            else:
+                desc += f"  +  carte {rl}"
         t2 = f_body.render(desc, True, Colors.GOLD)
         t2.set_alpha(alpha)
         self.screen.blit(t2, t2.get_rect(centerx=self.W // 2, y=py + 54))
