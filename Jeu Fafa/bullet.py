@@ -1,12 +1,17 @@
 import pygame 
 from math import cos, sin
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, posx, posy, bDir):
+    def __init__(self, posx, posy, bDir, id):
         pygame.sprite.Sprite.__init__(self)
         self.type = 2 #bullet
         self.image = pygame.Surface([5, 5]).convert_alpha()
-        self.image.fill((255,255,0))
+        
 
+        self.ID = id
+        if self.ID == 1:
+            self.image.fill((40,40,150))
+        else:
+            self.image.fill((255,255,0))
         self.dir = bDir
         self.rect = self.image.get_rect()
         self.rectbefore = self.image.get_rect()

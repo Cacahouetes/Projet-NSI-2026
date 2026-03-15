@@ -2,22 +2,34 @@ import pygame
 from math import sin, cos
 
 class Gun():
+    def loadimg(self, path):
+        return pygame.image.load("Assets/jeu arcade/guns/"+path).convert_alpha()
+
     def __init__(self, evtm):
-        self.img = pygame.image.load("Assets/jeu arcade/gun.png").convert_alpha()
+        self.imgs = [self.loadimg("gun.png"), self.loadimg("flygun.png"), self.loadimg("akgun.png")]
+        self.currGunID = 2
+
+        self.img = self.imgs[self.currGunID]
+
         self.rect = self.img.get_rect()
         self.tipx = 0
         self.tipy = 0
         self.angleOffset = 0
         self.eventman = evtm
+        self.lastFireTime = -10000
+        
 
     def eventGet(self, event):
         if event.value == self.eventman.evts['PLAYER_FIRE'].value:
             self.angleOffset = 20
 
-    def update(self, win, player, angleDeg):
+    def update(self):
+        pass
 
+    def draw(self, win, player, angleDeg):
         self.rect.centerx = player.rect.centerx - self.img.get_width()/2
         self.rect.centery = player.rect.centery - self.img.get_height()/2
+
         rotated_gun = self.img.copy()
 
         if abs(angleDeg) > 90:

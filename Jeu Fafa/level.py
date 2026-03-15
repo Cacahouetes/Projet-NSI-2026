@@ -8,6 +8,7 @@ from collectible import Collectible
 from bullet import Bullet
 from tile import Tile
 from gun import Gun
+from math import sin, cos
 import random
 class Level():
 
@@ -86,9 +87,16 @@ class Level():
         self.collectible_sprites.add(Collectible(xpos, ypos))
     
     def NewBullet(self):
-        bullet = Bullet(self.gun.tipx + self.scroll.x, self.gun.tipy + self.scroll.y , self.player.msPlDir)
-        self.bullet_sprites.add(bullet)
-        self.eventman.broadcast(self.eventman.evts['PLAYER_FIRE'])
+        seconds = pygame.time.get_ticks()/1000
+        tgap = seconds - self.gun.lastFireTime
+        if (self.gun.currGunID == 1 and tgap > 0.2) or (self.gun.currGunID == 2 and tgap > 0.08): 
+            self.gun.lastFireTime = seconds
+            bullet = Bullet(self.gun.tipx + self.scroll.x, self.gun.tipy + self.scroll.y , self.player.msPlDir, self.gun.currGunID)
+            self.bullet_sprites.add(bullet)
+            if self.gun.currGunID == 1:
+                self.player.velocity[1] -= sin(self.player.msPlDir)/1.5
+            
+            self.eventman.broadcast(self.eventman.evts['PLAYER_FIRE'])
 
     def updSprites(self, dt):
         self.ennemy_sprites.update(dt, self.tile_sprites, self.scroll, self.player)
@@ -178,6 +186,6 @@ class Level():
         pygame.draw.rect(win, (0,255,0), pygame.Rect(15,15,200*self.player.health, 50))
 
         #dessiner le pistolet
-        self.gun.update(win, self.player, self.player.msPlDir*180/3.14159265)
+        self.gun.draw(win, self.player, self.player.msPlDir*180/3.14159265)
         
         win.blit(self.scrfx.image, self.scrfx.rect)

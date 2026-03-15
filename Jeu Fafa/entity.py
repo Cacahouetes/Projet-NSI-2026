@@ -4,15 +4,35 @@ from enum import Enum
 
 
 class Entity(pygame.sprite.Sprite):
+    def loadimg(self, path):
+        return pygame.image.load(path).convert_alpha()
+
     def __init__(self, clr, posx, posy, events):
         pygame.sprite.Sprite.__init__(self)
         
         self.eventman = events
         self.type = 0 #0 == FOLLOW
         self.clr = clr
-        self.image = pygame.Surface([60, 90])
-        self.image.fill(self.clr)
+        self.animdict = {
+            "walk" : ["walk/ennemyWalk1.png", "walk/ennemyWalk2.png"],
+            "hit" : ["hit/ennemyHit1.png", "hit/ennemyHit2.png", "hit/ennemyHit3.png", "hit/ennemyHit4.png", "hit/ennemyHit5.png"],
+            "hurt" : ["hurt/ennemyHurt1.png", "hurt/ennemyHurt2.png"]
+        }
         
+        #charger les animations (meme code que dans player.py)
+        self.images = {}
+        self.images_orig = {}
+        for anim in self.animdict:
+            self.images[anim] = []
+            self.images_orig[anim] = []
+            for i in range(len(self.animdict[anim])):
+                self.images[anim].append(self.loadimg("Assets/jeu arcade/ennemy/" + self.animdict[anim][i]))
+                self.images[anim][i] = pygame.transform.scale2x(self.images[anim][i])
+                self.images_orig[anim].append(self.images[anim][i])
+        
+        self.curranim = "walk" 
+
+        self.image = self.images["walk"][0]
         self.rect = self.image.get_rect()
         self.rect.width = 10
 
@@ -27,9 +47,11 @@ class Entity(pygame.sprite.Sprite):
 
         self.states = Enum('state', [('FOLLOW', 0), ('DEAD', 1), ('ATTACK', 2), ('HURT', 3)])
         self.state = self.states['FOLLOW']
+        self.animspd = 6
 
     def update(self, delta, tileGroup, scroll, player):
         
+        #le code est très mauvais ici, j'aurais pu faire un state machine
         match self.state:
             case self.states.FOLLOW:
                 self.clr = (255,255,255)
@@ -38,6 +60,8 @@ class Entity(pygame.sprite.Sprite):
                 
                 if self.rect.colliderect(player.rect):#abs(plDist) < 10:
                     self.state = self.states['ATTACK']
+                    self.curranim = "hit"
+                    self.animspd = 10
                     self.tick = 0
 
                 if abs(plDist) < 10:
@@ -54,11 +78,17 @@ class Entity(pygame.sprite.Sprite):
                 
             case self.states.ATTACK:
                 self.clr = (255,255,0)
-                if self.tick == 0:
+                if self.tick == 0 and not player.isDead:
                     player.takedmg(0.02)
-                elif self.tick > 80:
-                    self.state = self.states['FOLLOW']
+
                 self.tick += 1
+
+                if self.tick > 25:
+                    self.state = self.states['FOLLOW']
+                    self.curranim = "walk"
+                    self.tick = 0
+                    self.animspd = 6
+                
             
             case self.states.DEAD:
                 self.clr = (0,0,0)
@@ -71,8 +101,11 @@ class Entity(pygame.sprite.Sprite):
                 self.tick += 1
                 if self.tick > 20:
                     self.state = self.states['FOLLOW']
-        
-        self.image.fill(self.clr)
+                    self.tick = 0
+                    self.curranim = "walk"     
+                    self.animspd = 6   
+        #self.image.fill(self.clr)
+        self.animations()
         self.movewCollision(tileGroup, scroll, delta)
     
     def movewCollision(self, tileGroup, scroll, delta):
@@ -127,5 +160,17 @@ class Entity(pygame.sprite.Sprite):
             self.state = self.states['DEAD']
         else:
             self.state = self.states['HURT']
+            self.tick = 0
+            self.curranim = "hurt"     
+            self.animspd = 6   
 
-    
+
+    def animations(self):
+        
+
+        animIdx = int(self.tick / 60 * self.animspd) % len(self.images[self.curranim])
+
+        if self.velocity[0] < 0:
+            self.image = pygame.transform.flip(self.images[self.curranim][animIdx], True, False)
+        else:
+            self.image = self.images_orig[self.curranim][animIdx]

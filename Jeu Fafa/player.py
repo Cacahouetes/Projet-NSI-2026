@@ -48,21 +48,23 @@ class Player(pygame.sprite.Sprite):
         self.velxbefore = abs(self.velocity[0])
         self.tick += 1
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            self.velocity[0] = -self.SPEED
+
+        if not self.isDead:
+            if keys[pygame.K_LEFT]:
+                self.velocity[0] = -self.SPEED
+                
+            elif keys[pygame.K_RIGHT]:
+                self.velocity[0] = self.SPEED
             
-        elif keys[pygame.K_RIGHT]:
-            self.velocity[0] = self.SPEED
-        
-        if keys[pygame.K_UP] and not self.jumping:
-            self.velocity[1] = 1
-            self.eventman.broadcast(self.eventman.evts['PLAYER_WALK_STOP'])
-            self.jumping = True
+            if keys[pygame.K_UP] and not self.jumping:
+                self.velocity[1] = 1
+                self.eventman.broadcast(self.eventman.evts['PLAYER_WALK_STOP'])
+                self.eventman.broadcast(self.eventman.evts['PLAYER_JUMP'])
+                self.jumping = True
     
         self.movewCollision(tileGroup, scroll, delta)
         self.updMousePos()
         self.animations()
-        print(self.velocity[0])
         if self.velxbefore < 0.1 and abs(self.velocity[0]) >= 0.1:
             self.eventman.broadcast(self.eventman.evts['PLAYER_WALK_START'])
         elif self.velxbefore > 0.1 and abs(self.velocity[0]) <= 0.1 :
@@ -136,7 +138,10 @@ class Player(pygame.sprite.Sprite):
                 if self.velocity[1] > 0: #haut
                     self.rect.top = hit_tile.rect.bottom 
                 elif self.velocity[1] < 0: #bas
+                    if self.jumping:
+                        self.eventman.broadcast(self.eventman.evts['PLAYER_LAND'])
                     self.jumping = False
+                    
                     self.rect.bottom = hit_tile.rect.top #+ self.rect.height
 
                 self.velocity[1] = 0
@@ -151,12 +156,16 @@ class Player(pygame.sprite.Sprite):
         self.msPlDir = atan2(ly, lx)
 
     def takedmg(self, damageNum):
-        self.eventman.broadcast(self.eventman.evts['PLAYER_TAKE_DAMAGE'])
+        
         self.health -= damageNum
-
+        
         self.r = 0
         if self.health < 0:
             self.isDead = True
+
+            self.eventman.broadcast(self.eventman.evts['PLAYER_DEAD'])
+        else:
+            self.eventman.broadcast(self.eventman.evts['PLAYER_TAKE_DAMAGE'])
 
     def eventGet(self, event):
         if event.value == self.eventman.evts['PLAYER_TAKE_DAMAGE'].value:

@@ -29,15 +29,15 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and level.gun.currGunID != 2:
             level.NewBullet()
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 pass
-    
-    #if pygame.mouse.get_pressed():
-    #    level.NewBullet()
+                
+    if  pygame.mouse.get_pressed()[0] and level.gun.currGunID == 2:
+        level.NewBullet()
 
     level.update(dt)
     level.draw(win)

@@ -15,6 +15,8 @@ class SoundManager:
         self.firesfx = mksnd("fire", 0.2)
 
         self.walksfx = mksnd("walking", 0.8)
+        self.jumpsfx = mksnd("jump", 0.4)
+        self.dedsfx = mksnd("mort", 0.6)
 
     def eventGet(self, event):
 
@@ -41,3 +43,15 @@ class SoundManager:
             
         elif event.value == self.eventman.evts['PLAYER_WALK_STOP'].value:
             self.walksfx.stop()
+        
+        elif event.value == self.eventman.evts['PLAYER_LAND'].value:
+            self.getsfx.stop()
+            self.getsfx.play()
+        
+        elif event.value == self.eventman.evts['PLAYER_JUMP'].value:
+            self.jumpsfx.stop()
+            self.jumpsfx.play()
+        
+        elif event.value == self.eventman.evts['PLAYER_DEAD'].value:
+            self.dedsfx.stop()
+            self.dedsfx.play()
