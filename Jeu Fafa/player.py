@@ -176,5 +176,13 @@ class Player(pygame.sprite.Sprite):
             #self.velocity[0] = -cos(self.msPlDir)/2
             #self.velocity[1] -= sin(self.msPlDir)/2
         
-        if event.value == self.eventman.evts['PLAYER_GET_THING'].value:
-            self.score += 10
+        if not self.isDead:
+            if event.value == self.eventman.evts['PLAYER_GET_PT'].value:
+                self.score += 10
+            
+            if event.value == self.eventman.evts['PLAYER_GET_HEALTH'].value:
+                self.health = min(1.0,self.health+0.2) 
+            
+            
+            
+            

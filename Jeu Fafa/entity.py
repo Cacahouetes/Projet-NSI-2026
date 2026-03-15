@@ -70,7 +70,6 @@ class Entity(pygame.sprite.Sprite):
                     self.velocity[0] = self.SPEED
                 else:
                     self.velocity[0] = -self.SPEED 
-
                 
                 self.r += delta
                 if self.r > 255:
@@ -79,7 +78,7 @@ class Entity(pygame.sprite.Sprite):
             case self.states.ATTACK:
                 self.clr = (255,255,0)
                 if self.tick == 0 and not player.isDead:
-                    player.takedmg(0.02)
+                    player.takedmg(0.06)
 
                 self.tick += 1
 
@@ -89,7 +88,6 @@ class Entity(pygame.sprite.Sprite):
                     self.tick = 0
                     self.animspd = 6
                 
-            
             case self.states.DEAD:
                 self.clr = (0,0,0)
                 self.velocity[0] = 0
@@ -164,10 +162,8 @@ class Entity(pygame.sprite.Sprite):
             self.curranim = "hurt"     
             self.animspd = 6   
 
-
     def animations(self):
         
-
         animIdx = int(self.tick / 60 * self.animspd) % len(self.images[self.curranim])
 
         if self.velocity[0] < 0:

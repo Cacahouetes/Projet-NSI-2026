@@ -23,7 +23,7 @@ pygame.mixer.music.play(-1)
 while running:
     dt = clock.tick(60) 
     keys = pygame.key.get_pressed()
-    win.fill((0,0,0))   
+    win.fill((60,48,39))   
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -31,6 +31,18 @@ while running:
         
         if event.type == pygame.MOUSEBUTTONDOWN and level.gun.currGunID != 2:
             level.NewBullet()
+        
+        if event.type == pygame.MOUSEWHEEL:
+            
+            if event.y == -1:
+                level.gun.currGunID-=1
+                if level.gun.currGunID <0:
+                    level.gun.currGunID = level.gun.unlockedGuns-1
+                
+            elif event.y == 1:
+                level.gun.currGunID+=1
+                if level.gun.currGunID >= level.gun.unlockedGuns:
+                    level.gun.currGunID = 0
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:

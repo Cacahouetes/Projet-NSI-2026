@@ -30,7 +30,7 @@ class SoundManager:
             self.entdmgsfx[r].stop()
             self.entdmgsfx[r].play()
         
-        elif event.value == self.eventman.evts['PLAYER_GET_THING'].value:
+        elif event.value == self.eventman.evts['PLAYER_GET_PT'].value:
             self.getsfx.stop()
             self.getsfx.play()
         

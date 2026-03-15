@@ -1,11 +1,16 @@
 import pygame
 from math import sin 
 class Collectible(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def loadimg(self, path):
+        return pygame.image.load("Assets/jeu arcade/collec/"+path).convert_alpha()
+
+    def __init__(self, x, y, ctype):
         pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.Surface([10,10])
-        self.image.fill((40,40,40, 255))
+        self.imgs = [self.loadimg("point.png"), self.loadimg("health.png"), self.loadimg("flyg.png"), self.loadimg("akgun.png")]
+
+        self.ctype = ctype
+        self.image = self.imgs[self.ctype]
         self.rect = self.image.get_rect()
 
         self.posX = x 

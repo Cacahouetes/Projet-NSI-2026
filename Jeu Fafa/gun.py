@@ -7,10 +7,10 @@ class Gun():
 
     def __init__(self, evtm):
         self.imgs = [self.loadimg("gun.png"), self.loadimg("flygun.png"), self.loadimg("akgun.png")]
-        self.currGunID = 2
+        self.currGunID = 0
 
         self.img = self.imgs[self.currGunID]
-
+        self.unlockedGuns = 1
         self.rect = self.img.get_rect()
         self.tipx = 0
         self.tipy = 0
@@ -22,9 +22,15 @@ class Gun():
     def eventGet(self, event):
         if event.value == self.eventman.evts['PLAYER_FIRE'].value:
             self.angleOffset = 20
+        
+        if event.value == self.eventman.evts['PLAYER_GET_NEW_FLY'].value:
+            self.unlockedGuns = 2
+            
+        if event.value == self.eventman.evts['PLAYER_GET_NEW_AK'].value:
+            self.unlockedGuns = 3
 
     def update(self):
-        pass
+        self.img = self.imgs[self.currGunID]
 
     def draw(self, win, player, angleDeg):
         self.rect.centerx = player.rect.centerx - self.img.get_width()/2

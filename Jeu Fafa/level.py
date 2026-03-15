@@ -8,9 +8,12 @@ from collectible import Collectible
 from bullet import Bullet
 from tile import Tile
 from gun import Gun
-from math import sin, cos
+from math import sin, cos,ceil, sqrt
 import random
+def loadimg(path):
+        return pygame.image.load("Assets/jeu arcade/" + path).convert_alpha()
 class Level():
+    
 
     def __init__(self):
         self.TILE_SIZE = 32 
@@ -23,7 +26,7 @@ class Level():
         self.waveN = 0
         
         self.tiles = []
-        self.tiles_img = [pygame.image.load("Assets/jeu arcade/fg.png").convert_alpha(), pygame.image.load("Assets/jeu arcade/bg.png").convert_alpha()]
+        self.tiles_img = [loadimg("bg.png"), loadimg("fg.png"), loadimg("fgright.png"), loadimg("fgleft.png")]
 
         self.readLevelFile("Jeu Fafa/niveau.txt")
         self.LoadTileTexts()
@@ -84,12 +87,23 @@ class Level():
                 self.tile_sprites.add(newTile)
 
     def newCollectible(self, xpos, ypos):
-        self.collectible_sprites.add(Collectible(xpos, ypos))
+        val=0
+        rand=random.randint(0,9)
+        if rand >=4: #30% de probabilité
+            rand = random.randint(0,9)
+            if rand >= 7 and self.gun.unlockedGuns!=3: #??% de probabilité
+                if self.gun.unlockedGuns==1:
+                    val=2 #nouv. arme fly
+                else:
+                    val=3 #nouv. arme ak-47
+            else:
+                val=1 #upgrade santé
+        self.collectible_sprites.add(Collectible(xpos, ypos, val))
     
     def NewBullet(self):
         seconds = pygame.time.get_ticks()/1000
         tgap = seconds - self.gun.lastFireTime
-        if (self.gun.currGunID == 1 and tgap > 0.2) or (self.gun.currGunID == 2 and tgap > 0.08): 
+        if (self.gun.currGunID == 1 and tgap > 0.2) or (self.gun.currGunID == 2 and tgap > 0.08) or (self.gun.currGunID == 0 and tgap > 0.1): 
             self.gun.lastFireTime = seconds
             bullet = Bullet(self.gun.tipx + self.scroll.x, self.gun.tipy + self.scroll.y , self.player.msPlDir, self.gun.currGunID)
             self.bullet_sprites.add(bullet)
@@ -110,8 +124,8 @@ class Level():
                             coll_spr.rect.centerx = coll_spr.rect.centerx + 5*way
                 
             if sprite.state.value == sprite.states['DEAD'].value:
-                sprposx = sprite.posX 
-                sprposy = sprite.posY 
+                sprposx = sprite.posX + sprite.rect.width/2
+                sprposy = sprite.posY + sprite.rect.height/2
                 sprite.kill()
                 self.newCollectible(sprposx, sprposy)
 
@@ -126,7 +140,7 @@ class Level():
 
             for ennemy in self.ennemy_sprites:
                 if ennemy.rect.clipline((bul.rectbefore.x, bul.rectbefore.y), (bul.rect.x, bul.rect.y)):
-                    ennemy.takedmg(0.5)
+                    ennemy.takedmg(bul.dmgnum)
                     bul.kill()
                     break
             
@@ -139,7 +153,14 @@ class Level():
         #        coll.takedmg(0.1)
         
         for colc_coll in pygame.sprite.spritecollide(self.player, self.collectible_sprites, False):
-            self.eventman.broadcast(self.eventman.evts['PLAYER_GET_THING'])
+            if colc_coll.ctype == 0:
+                self.eventman.broadcast(self.eventman.evts['PLAYER_GET_PT'])
+            elif colc_coll.ctype == 1:
+                self.eventman.broadcast(self.eventman.evts['PLAYER_GET_HEALTH'])
+            elif colc_coll.ctype == 2:
+                self.eventman.broadcast(self.eventman.evts['PLAYER_GET_NEW_FLY'])
+            elif colc_coll.ctype == 3:
+                self.eventman.broadcast(self.eventman.evts['PLAYER_GET_NEW_AK'])
             colc_coll.kill()
 
     def update(self, dt):
@@ -160,13 +181,14 @@ class Level():
         self.updSprites(dt)
         self.updPlayer()
         self.updBullets(dt)
+        self.gun.update()
 
         self.scrfx.update()
         self.collectible_sprites.update(self.scroll, dt)
 
     def NewWave(self):
         self.waveN += 1
-        for i in range(4**self.waveN):
+        for i in range(ceil(sqrt(self.waveN*8))):
             self.newEntity(random.randrange(100,2500))
         
 
