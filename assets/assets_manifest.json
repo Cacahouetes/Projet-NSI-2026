@@ -1,0 +1,391 @@
+{
+  "project": "Card Simulator NSI 2026",
+  "description": "Assets a fournir au designer. Tous les PNG sont des placeholders a remplacer. Les sons sont a creer.",
+  "total_files": 64,
+  "categories": {
+    "backgrounds": [
+      {
+        "file": "assets/card_game/bg_menu.png",
+        "size": "1280x720",
+        "desc": "Fond Menu principal",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/bg_chest.png",
+        "size": "1280x720",
+        "desc": "Fond Coffre",
+        "format": "PNG"
+      }
+    ],
+    "ui": [
+      {
+        "file": "assets/card_game/logo.png",
+        "size": "420x135",
+        "desc": "Logo du jeu",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/icon_coin.png",
+        "size": "28x28",
+        "desc": "Icone piece (HUD)",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/card_silhouette.png",
+        "size": "100x140",
+        "desc": "Silhouette carte non decouverte",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_coins_1000.png",
+        "size": "48x48",
+        "desc": "Icone succes coins_1000",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_coins_10000.png",
+        "size": "48x48",
+        "desc": "Icone succes coins_10000",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_coins_100000.png",
+        "size": "48x48",
+        "desc": "Icone succes coins_100000",
+        "format": "PNG"
+      }
+    ],
+    "cards_frames_badges": [
+      {
+        "file": "assets/Cards/card_back.png",
+        "size": "300x420",
+        "desc": "Dos de carte",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_frame_commune.png",
+        "size": "300x420",
+        "desc": "Cadre carte commune",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_frame_rare.png",
+        "size": "300x420",
+        "desc": "Cadre carte rare",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_frame_epique.png",
+        "size": "300x420",
+        "desc": "Cadre carte epique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_frame_legendaire.png",
+        "size": "300x420",
+        "desc": "Cadre carte legendaire",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_frame_mythique.png",
+        "size": "300x420",
+        "desc": "Cadre carte mythique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_frame_unique.png",
+        "size": "300x420",
+        "desc": "Cadre carte unique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_frame_divine.png",
+        "size": "300x420",
+        "desc": "Cadre carte divine",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_rarity_badge_commune.png",
+        "size": "64x24",
+        "desc": "Badge rareté commune",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_rarity_badge_rare.png",
+        "size": "64x24",
+        "desc": "Badge rareté rare",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_rarity_badge_epique.png",
+        "size": "64x24",
+        "desc": "Badge rareté epique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_rarity_badge_legendaire.png",
+        "size": "64x24",
+        "desc": "Badge rareté legendaire",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_rarity_badge_mythique.png",
+        "size": "64x24",
+        "desc": "Badge rareté mythique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_rarity_badge_unique.png",
+        "size": "64x24",
+        "desc": "Badge rareté unique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/card_rarity_badge_divine.png",
+        "size": "64x24",
+        "desc": "Badge rareté divine",
+        "format": "PNG"
+      }
+    ],
+    "category_icons": [
+      {
+        "file": "assets/card_game/cards/category_icon_meme.png",
+        "size": "32x32",
+        "desc": "Icone categorie meme",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/category_icon_mots.png",
+        "size": "32x32",
+        "desc": "Icone categorie mots",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/category_icon_objets.png",
+        "size": "32x32",
+        "desc": "Icone categorie objets",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/category_icon_personnages.png",
+        "size": "32x32",
+        "desc": "Icone categorie personnages",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/cards/category_icon_concepts.png",
+        "size": "32x32",
+        "desc": "Icone categorie concepts",
+        "format": "PNG"
+      }
+    ],
+    "achievements": [
+      {
+        "file": "assets/card_game/achievements/achievement_icon_first_chest.png",
+        "size": "48x48",
+        "desc": "Icone succes first_chest",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_first_rare.png",
+        "size": "48x48",
+        "desc": "Icone succes first_rare",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_first_epique.png",
+        "size": "48x48",
+        "desc": "Icone succes first_epique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_first_legendaire.png",
+        "size": "48x48",
+        "desc": "Icone succes first_legendaire",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_first_mythique.png",
+        "size": "48x48",
+        "desc": "Icone succes first_mythique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_first_unique.png",
+        "size": "48x48",
+        "desc": "Icone succes first_unique",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_first_divine.png",
+        "size": "48x48",
+        "desc": "Icone succes first_divine",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_chest_10.png",
+        "size": "48x48",
+        "desc": "Icone succes chest_10",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_chest_50.png",
+        "size": "48x48",
+        "desc": "Icone succes chest_50",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_chest_100.png",
+        "size": "48x48",
+        "desc": "Icone succes chest_100",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_fusion_first.png",
+        "size": "48x48",
+        "desc": "Icone succes fusion_first",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_fusion_10.png",
+        "size": "48x48",
+        "desc": "Icone succes fusion_10",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_fusion_master.png",
+        "size": "48x48",
+        "desc": "Icone succes fusion_master",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_shop_first.png",
+        "size": "48x48",
+        "desc": "Icone succes shop_first",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_shop_10.png",
+        "size": "48x48",
+        "desc": "Icone succes shop_10",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_daily_3.png",
+        "size": "48x48",
+        "desc": "Icone succes daily_3",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_daily_7.png",
+        "size": "48x48",
+        "desc": "Icone succes daily_7",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_daily_30.png",
+        "size": "48x48",
+        "desc": "Icone succes daily_30",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_daily_streak_7.png",
+        "size": "48x48",
+        "desc": "Icone succes daily_streak_7",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_daily_streak_30.png",
+        "size": "48x48",
+        "desc": "Icone succes daily_streak_30",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_carddex_10pct.png",
+        "size": "48x48",
+        "desc": "Icone succes carddex_10pct",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_carddex_50pct.png",
+        "size": "48x48",
+        "desc": "Icone succes carddex_50pct",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_carddex_100pct.png",
+        "size": "48x48",
+        "desc": "Icone succes carddex_100pct",
+        "format": "PNG"
+      },
+      {
+        "file": "assets/card_game/achievements/achievement_icon_sell_100.png",
+        "size": "48x48",
+        "desc": "Icone succes sell_100",
+        "format": "PNG"
+      }
+    ],
+    "sounds": [
+      {
+        "file": "assets/card_game/sounds/music_menu.mp3",
+        "desc": "Musique fond Menu (loop)",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/music_chest.mp3",
+        "desc": "Musique fond Coffre (loop)",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_chest_open.wav",
+        "desc": "Son ouverture coffre",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_card_flip.wav",
+        "desc": "Son flip de carte",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_card_epic.wav",
+        "desc": "Son carte epique/divine revelee",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_buy.wav",
+        "desc": "Son achat shop",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_coin.wav",
+        "desc": "Son gain de pieces",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_daily.wav",
+        "desc": "Son reclamation daily reward",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_fusion_start.wav",
+        "desc": "Son lancement fusion",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_fusion_success.wav",
+        "desc": "Son fusion reussie",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_fusion_fail.wav",
+        "desc": "Son fusion echouee",
+        "format": "WAV 44100Hz stereo (SFX)"
+      },
+      {
+        "file": "assets/card_game/sounds/sfx_achievement.wav",
+        "desc": "Son succes debloque",
+        "format": "WAV 44100Hz stereo (SFX)"
+      }
+    ]
+  }
+}

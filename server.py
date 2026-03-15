@@ -8,6 +8,7 @@ BASE_DIR = os.path.dirname(__file__)
 # Chemin vers la base de données SQLite
 DB_PATH = os.path.join(BASE_DIR, 'data', 'game.db')
 
+
 # template_folder → dossier où Flask cherche les fichiers HTML (render_template)
 # static_folder   → dossier où Flask sert les fichiers CSS, JS, images statiques
 app = Flask(__name__,
@@ -90,7 +91,7 @@ def serve_data(filename):
 
 
 # LANCEMENT DU SERVEUR
-# Ce bloc ne s'exécute que si on lance directement "python server.py",
+# Ce bloc ne s'exécute que si on lance directement "python server.py" dans le terminal,
 # pas si server.py est importé comme module par un autre script.
 #
 # port=5000   → adresse d'accès : http://localhost:5000
