@@ -856,8 +856,8 @@ def db_update_play_time(player_id: int, seconds_to_add: int) -> bool:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Shop persistance
 # ═══════════════════════════════════════════════════════════════════════════════
-
-
+ 
+ 
 def db_load_shop() -> list:
     """
     Charge TOUS les slots du cycle en cours (sold=0 et sold=1).
@@ -875,8 +875,8 @@ def db_load_shop() -> list:
         raise Exception(f"Erreur db_load_shop : {e}")
     finally:
         conn.close()
-
-
+ 
+ 
 def db_save_shop(slots: list) -> bool:
     """Ecrase le shop complet. slots : list of {slot, card_id, price, available_until}"""
     conn = get_connection()
@@ -895,8 +895,8 @@ def db_save_shop(slots: list) -> bool:
         raise Exception(f"Erreur db_save_shop : {e}")
     finally:
         conn.close()
-
-
+ 
+ 
 def db_clear_shop() -> bool:
     """Vide SHOP_CARDS (avant un restock)."""
     conn = get_connection()
@@ -908,27 +908,20 @@ def db_clear_shop() -> bool:
         raise Exception(f"Erreur db_clear_shop : {e}")
     finally:
         conn.close()
-
-
-def db_remove_shop_slot(player_id: int, index: int) -> bool:
+ 
+ 
+def db_remove_shop_slot(player_id: int, shop_slot: int) -> bool:
     """
-    Marque le slot a la position index comme vendu (sold=1).
-    Ne supprime PAS la ligne — conserve le cycle actif en DB.
+    Marque le slot shop_slot (0, 1 ou 2) comme vendu (sold=1).
+    shop_slot est la valeur directe de la colonne SHOP_CARDS.shop_slot,
+    pas un index dans une liste filtrée.
     """
     conn = get_connection()
     try:
-        cursor = conn.cursor()
-        # Chercher uniquement parmi les slots disponibles (non vendus)
-        cursor.execute(
-            "SELECT shop_slot FROM SHOP_CARDS WHERE sold = 0 ORDER BY shop_slot ASC"
-        )
-        slots = [row["shop_slot"] for row in cursor.fetchall()]
-        if index < 0 or index >= len(slots):
-            return False
         with conn:
             conn.execute(
                 "UPDATE SHOP_CARDS SET sold = 1 WHERE shop_slot = ?",
-                (slots[index],)
+                (shop_slot,)
             )
         return True
     except sqlite3.Error as e:

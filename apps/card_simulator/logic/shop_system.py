@@ -5,7 +5,7 @@ from card import Rarity, Card, RARITY_SELL_VALUE
 from card_repository import CardRepository
 
 SHOP_PRICE_MULTIPLIER = 2
-SHOP_RESTOCK_HOURS    = 24        # durée d'un stock en heures
+SHOP_RESTOCK_HOURS    = 3        # durée d'un stock en heures
 SHOP_SIZE             = 3
 
 SHOP_RARITY_WEIGHTS = [
