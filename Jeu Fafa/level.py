@@ -32,9 +32,9 @@ class Level():
         self.soundman = SoundManager(self.eventman)
         self.player = Player(300, 150, self.eventman)
         self.scrfx = ScreenEffects(self.eventman, self)
-
+        
         #relier les objets au système d'evenements pour qu'ils les captent
-        self.eventman.eventObjects.append(self.soundman)
+        #self.eventman.eventObjects.append(self.soundman)
         self.eventman.eventObjects.append(self.player)
         self.eventman.eventObjects.append(self.scrfx)
         self.eventman.eventObjects.append(self.scrfx)
@@ -46,6 +46,7 @@ class Level():
         self.NewWave()
 
     def __init__(self):
+
         self.TILE_SIZE = 32 
         self.scroll = pygame.math.Vector2(0,0)
         self.tile_sprites = pygame.sprite.Group()
@@ -63,6 +64,8 @@ class Level():
         self.NewGame()
     
     def readLevelFile(self, path):
+        """Lit le fichier texte et . """
+
         niveau = open(path, "r")
         while True:
             row = niveau.readline()
@@ -76,16 +79,19 @@ class Level():
             self.tiles.append(rowlist)
 
     def newEntity(self, xpos, isStrong):
+        """Crée un nouveau ennemi."""
         newent = Entity((xpos%255, 200,200), xpos, 150, self.eventman, isStrong)
         newent.type = 0
         self.ennemy_sprites.add(newent)
         self.ent_draw_sprites.add(newent)
     
     def LoadTileTexts(self):
+        """Charge les textures des 'tiles' du jeu."""
         for i in range(len(self.tiles_img)):
             self.tiles_img[i] = pygame.transform.scale(self.tiles_img[i], (self.TILE_SIZE, self.TILE_SIZE))
     
     def LoadTileSprites(self):
+        """Charge les 'tiles' du jeu (les murs et le sol)."""
         for y in range(len(self.tiles)):
             for x in range(len(self.tiles[0])):
                 newTile = Tile()
@@ -98,6 +104,7 @@ class Level():
                 self.tile_sprites.add(newTile)
 
     def newCollectible(self, xpos, ypos):
+        """Crée une nouvelle collectible, choisie aléatoirement."""
         val=0
         rand=random.randint(0,9)
         if rand >=8: #30% de probabilité
@@ -112,18 +119,24 @@ class Level():
         self.collectible_sprites.add(Collectible(xpos, ypos, val))
     
     def NewBullet(self):
+        """Crée un nouveau projectile."""
         seconds = pygame.time.get_ticks()/1000
-        tgap = seconds - self.gun.lastFireTime
-        if (self.gun.currGunID == 1 and tgap > 0.2) or (self.gun.currGunID == 2 and tgap > 0.08) or (self.gun.currGunID == 0 and tgap > 0.1): 
+        tgap = seconds - self.gun.lastFireTime #temps déoulé depuis le dernier tir en secondes
+        
+        #les conditions nécessaires pour faire apparaitre la munition
+        canSpawn = (self.gun.currGunID == 1 and tgap > 0.2) or (self.gun.currGunID == 2 and tgap > 0.08) or (self.gun.currGunID == 0 and tgap > 0.1)
+        if canSpawn: 
             self.gun.lastFireTime = seconds
             bullet = Bullet(self.gun.tipx + self.scroll.x, self.gun.tipy + self.scroll.y , self.player.msPlDir, self.gun.currGunID)
             self.bullet_sprites.add(bullet)
-            if self.gun.currGunID == 1:
+            
+            if self.gun.currGunID == 1: #si on tire avec un FlyGun, le joueur recule en arrière
                 self.player.velocity[1] -= sin(self.player.msPlDir)/1.5
             
             self.eventman.broadcast(self.eventman.evts['PLAYER_FIRE'])
 
     def updSprites(self, dt):
+        """Met à jour les ennemis et de leur collisions."""
         self.ennemy_sprites.update(dt, self.tile_sprites, self.scroll, self.player)
         for sprite in self.ennemy_sprites:
             for coll_spr in self.ennemy_sprites:
@@ -141,6 +154,7 @@ class Level():
                 self.newCollectible(sprposx, sprposy)
 
     def updBullets(self, dt):
+        """Met à jour les projectiles des armes et de leur collisions."""
         for bul in self.bullet_sprites:
             bul.update(dt, self.scroll)
             for tile in self.tile_sprites:
@@ -159,10 +173,7 @@ class Level():
                 bul.kill()
 
     def updPlayer(self):
-        #for coll in pygame.sprite.spritecollide(self.player, self.ennemy_sprites, False):  
-        #    if isHitPressed and coll != player:
-        #        coll.takedmg(0.1)
-        
+        """Vérifie les collisions des collectibles avec le joueur. """
         for colc_coll in pygame.sprite.spritecollide(self.player, self.collectible_sprites, False):
             if colc_coll.ctype == 0:
                 self.eventman.broadcast(self.eventman.evts['PLAYER_GET_PT'])
@@ -202,7 +213,7 @@ class Level():
         match self.currState:
             case self.lvlStates.NORMAL:
                 if self.isAllDead():
-                    self.eventman.broadcast(self.eventman.evts['WAVE_END'])
+                    self.eventman.broadcast(self.eventman.evts['WAVE_END']) 
 
             case self.lvlStates.WAVE_START:
                 pass
@@ -218,7 +229,7 @@ class Level():
     def NewWave(self):
         self.waveN += 1
         ennemyNum = ceil(sqrt(self.waveN*8)) #vitesse d'augmentation des ennemis qui ralentit au fil des vagues
-        strongEnnemyNum = ceil(0.1*(self.waveN+3)**2 - (self.waveN+3)+2) #fonction du second degré (enfin les maths qui servent à une chose), a un moment il dépasse le nombre d'ennemis moyens
+        strongEnnemyNum = ceil(0.1*(self.waveN+3)**2 - (self.waveN+3)+2) #fonction du second degré (enfin les maths qui servent à une chose), a un moment il dépasse le nombre d'ennemis moyens 
         strongEnnemyNum = min(strongEnnemyNum, ennemyNum)
 
         for i in range(strongEnnemyNum):

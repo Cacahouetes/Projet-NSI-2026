@@ -10,21 +10,23 @@ pygame.init()
 pygame.font.init()
 font = pygame.font.SysFont('Arial', 40)
 
-pygame.mixer.init()
+#pygame.mixer.init()
 win = pygame.display.set_mode((1280, 736), vsync=1)
 pygame.display.set_caption("jeu nsiissininisissini")
 clock = pygame.time.Clock()
 
 level = Level()
 
-pygame.mixer.music.load('Assets/jeu arcade/musique/onlyvoicemusic.mp3')
-pygame.mixer.music.play(-1) #-1 pour mettre la musique en boucle
+#pygame.mixer.music.load('Assets/jeu arcade/musique/onlyvoicemusic.mp3')
+#pygame.mixer.music.play(-1) #-1 pour mettre la musique en boucle
 
+#boucle principale du jeu
 while running:
     dt = clock.tick(60) 
     keys = pygame.key.get_pressed()
     win.fill((60,48,39))   
 
+    #Entree du jeu (input)
     for event in pygame.event.get():
         
         if not level.player.isDead:
@@ -46,7 +48,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
             
-                
     if  pygame.mouse.get_pressed()[0] and level.gun.currGunID == 2:
         level.NewBullet()
 

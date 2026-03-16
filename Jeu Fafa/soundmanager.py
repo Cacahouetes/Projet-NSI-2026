@@ -2,12 +2,15 @@ import pygame
 from enum import Enum
 from random import randint
 def mksnd(path, vol):
+    """Crée un nouveau objet son et le retourne. """
     snd = pygame.mixer.Sound(f"Assets/jeu arcade/sfx/{path}.wav")
     snd.set_volume(vol)
     return snd
+    
 class SoundManager:
     def __init__(self, eventm):
         self.eventman = eventm
+        return
         self.dmgsfx = [mksnd("aie1", 0.4),mksnd("aie2", 0.4),mksnd("aie3", 0.4),mksnd("aie4", 0.4)]
         self.entdmgsfx = [mksnd("zombhurt1", 0.3),mksnd("zombhurt2", 0.3),mksnd("zombhurt3", 0.3),mksnd("zombhurt4", 0.3), mksnd("zombhurt5", 0.3)]
         
