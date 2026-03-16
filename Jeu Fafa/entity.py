@@ -10,7 +10,7 @@ class Entity(pygame.sprite.Sprite):
     def __init__(self, clr, posx, posy, events, isStrong):
         pygame.sprite.Sprite.__init__(self)
         
-        self.eventman = events
+        self.eventMan = events
         self.isStrong = isStrong 
         self.clr = clr
 
@@ -151,7 +151,7 @@ class Entity(pygame.sprite.Sprite):
                 self.velocity[1] = 0
 
     def takedmg(self, damageNum):
-        self.eventman.broadcast(self.eventman.evts['ENNEMY_TAKE_DAMAGE'])
+        self.eventMan.broadcast(self.eventMan.evts['ENNEMY_TAKE_DAMAGE'])
         self.health -= damageNum
 
         self.r = 0

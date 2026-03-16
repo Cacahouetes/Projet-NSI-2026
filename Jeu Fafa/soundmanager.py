@@ -6,67 +6,82 @@ def mksnd(path, vol):
     snd = pygame.mixer.Sound(f"Assets/jeu arcade/sfx/{path}.wav")
     snd.set_volume(vol)
     return snd
-    
+
+
 class SoundManager:
+    def PlaySound(self, soundfile):
+        soundfile.stop()
+        soundfile.play()
+
     def __init__(self, eventm):
-        self.eventman = eventm
-        return
+        self.eventMan = eventm
         self.dmgsfx = [mksnd("aie1", 0.4),mksnd("aie2", 0.4),mksnd("aie3", 0.4),mksnd("aie4", 0.4)]
         self.entdmgsfx = [mksnd("zombhurt1", 0.3),mksnd("zombhurt2", 0.3),mksnd("zombhurt3", 0.3),mksnd("zombhurt4", 0.3), mksnd("zombhurt5", 0.3)]
         
-        self.getsfx = mksnd("land", 0.4)
+        self.getsfx = mksnd("point", 0.7)
+        self.getHpSFX = mksnd("get_health", 1)
+        self.getGunSFX = mksnd("new_gun", 1)
+        self.changeGunSFX = mksnd("change_gun", 0.5)
+
         self.firesfx = mksnd("fire", 0.2)
 
         self.walksfx = mksnd("walking", 0.8)
         self.jumpsfx = mksnd("jump", 0.4)
         
-        self.newavesfx = mksnd("nor", 10.0)
-        self.wavendsfx = mksnd("nor", 10)
+        self.wavendsfx = mksnd("new_wave", 1)
 
         self.dedsfx = mksnd("mort", 0.6)
 
     def eventGet(self, event):
 
-        if event.value == self.eventman.evts['PLAYER_TAKE_DAMAGE'].value:
-            r = randint(0,3)
-            self.dmgsfx[r].stop()
-            self.dmgsfx[r].play()
-        
-        elif event.value == self.eventman.evts['ENNEMY_TAKE_DAMAGE'].value:
-            r = randint(0,4)
-            self.entdmgsfx[r].stop()
-            self.entdmgsfx[r].play()
-        
-        elif event.value == self.eventman.evts['PLAYER_GET_PT'].value:
-            self.getsfx.stop()
-            self.getsfx.play()
-        
-        elif event.value == self.eventman.evts['PLAYER_FIRE'].value:
-            self.firesfx.stop()
-            self.firesfx.play()
-        
-        elif event.value == self.eventman.evts['PLAYER_WALK_START'].value:
-            self.walksfx.play()
+        match event:
             
-        elif event.value == self.eventman.evts['PLAYER_WALK_STOP'].value:
-            self.walksfx.stop()
+            case self.eventMan.evts.PLAYER_TAKE_DAMAGE:
+                r = randint(0,3)
+                self.PlaySound(self.dmgsfx[r])
+            
+            case self.eventMan.evts.ENNEMY_TAKE_DAMAGE:
+                r = randint(0,4)
+                self.PlaySound(self.entdmgsfx[r])
+            
+            case self.eventMan.evts.PLAYER_GET_PT:
+                self.PlaySound(self.getsfx)
+            
+            case self.eventMan.evts.PLAYER_GET_HEALTH:
+                self.PlaySound(self.getHpSFX)
+            
+            case self.eventMan.evts.PLAYER_FIRE:
+                self.PlaySound(self.firesfx)
+            
+            case self.eventMan.evts.PLAYER_WALK_START:
+                self.walksfx.play()
+                
+            case self.eventMan.evts.PLAYER_WALK_STOP:
+                self.walksfx.stop()
+            
+            case self.eventMan.evts.PLAYER_LAND:
+                self.PlaySound(self.getsfx)
+            
+            case self.eventMan.evts.PLAYER_JUMP:
+                self.PlaySound(self.jumpsfx)
+            
+            case self.eventMan.evts.PLAYER_DEAD:
+                self.PlaySound(self.dedsfx)
+            
+            case self.eventMan.evts.WAVE_END:
+                self.PlaySound(self.wavendsfx)
+            
+            case self.eventMan.evts.PLAYER_JUMP:
+                self.PlaySound(self.jumpsfx)
+            
+            case self.eventMan.evts.PLAYER_DEAD:
+                self.PlaySound(self.dedsfx)
+            
+            case self.eventMan.evts.WAVE_END:
+                self.PlaySound(self.wavendsfx)
+            
+            case self.eventMan.evts.CHANGE_GUN:
+                self.PlaySound(self.changeGunSFX)
         
-        elif event.value == self.eventman.evts['PLAYER_LAND'].value:
-            self.getsfx.stop()
-            self.getsfx.play()
         
-        elif event.value == self.eventman.evts['PLAYER_JUMP'].value:
-            self.jumpsfx.stop()
-            self.jumpsfx.play()
-        
-        elif event.value == self.eventman.evts['PLAYER_DEAD'].value:
-            self.dedsfx.stop()
-            self.dedsfx.play()
-        
-        elif event.value == self.eventman.evts['WAVE_END'].value:
-            self.wavendsfx.stop()
-            self.wavendsfx.play()
-        
-        elif event.value == self.eventman.evts['NEW_WAVE'].value:
-            self.newavesfx.stop()
-            self.newavesfx.play()
+

@@ -9,14 +9,14 @@ class ScreenEffects(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.tick = 100
         self.scenetick = 10000
-        self.eventman = eventman
+        self.eventMan = eventman
         self.level = lvl
 
         self.fontBig = pygame.font.Font("Assets/jeu arcade/FONT.ttf", 80)
         self.fontSmall = pygame.font.Font("Assets/jeu arcade/FONT.ttf", 25)
         self.isNewWave = False        
         self.flashType =  Enum('flashType', [('dmg',0),('new_gun',1), ('hp',2), ('dead', 3), ('pt', 4)])
-        self.currFlash = self.flashType['dmg']
+        self.currFlash = self.flashType.dmg
 
     def update(self):
         
@@ -26,26 +26,29 @@ class ScreenEffects(pygame.sprite.Sprite):
 
         val = max(0, 255-self.tick**2)
 
-        match self.currFlash.value:
+        match self.currFlash:
             
-            case 0: #j'etais obligé d'utiliser des chiffres, sinon ça faisait un bug bizarre
+            case self.flashType.dmg:
                 self.image.fill((val,0,0, val))
             
-            case 1:
+            case self.flashType.new_gun:
                 self.image.fill((0,0,50, val))
             
-            case 2:
+            case self.flashType.hp:
                 self.image.fill((0,150,0, val))
             
-            case 3:
+            case self.flashType.dead:
                 self.image.fill((124,54,54, 100))
                 ded = self.fontBig.render(f"Vous êtes mort.", True, (220,175,175))
                 self.image.blit(ded, (1280/2-ded.get_width()/2, 720/2 - ded.get_height()/2))
-            
-                ded = self.fontSmall.render(f"R pour rejouer. ", True, (175,150,150))
+
+                ded = self.fontSmall.render(f"Vous avez survécu jusqu'à la {self.level.waveN}ème vague.", True, (185,150,150))
                 self.image.blit(ded, (1280/2-ded.get_width()/2, 720/2 - ded.get_height()/2+50))
+
+                ded = self.fontSmall.render(f"R pour rejouer. ", True, (175,150,150))
+                self.image.blit(ded, (1280/2-ded.get_width()/2, 720/2 - ded.get_height()/2+100))
             
-            case 4:
+            case self.flashType.pt:
                 self.image.fill((val, val, 0, val))
         
         if self.isNewWave:
@@ -58,29 +61,29 @@ class ScreenEffects(pygame.sprite.Sprite):
 
 
     def eventGet(self, event):
-        if event.value == self.eventman.evts['WAVE_END'].value:
+        if event.value == self.eventMan.evts.WAVE_END.value:
             self.scenetick = 0
             self.isNewWave = True
 
-        if event.value == self.eventman.evts['NEW_WAVE'].value:
+        if event.value == self.eventMan.evts.NEW_WAVE.value:
             self.scenetick = 0
             self.isNewWave = False
 
-        if event.value == self.eventman.evts['PLAYER_TAKE_DAMAGE'].value:
-            self.currFlash = self.flashType['dmg']
+        if event.value == self.eventMan.evts.PLAYER_TAKE_DAMAGE.value:
+            self.currFlash = self.flashType.dmg
             self.tick = 10
         
-        if event.value == self.eventman.evts['PLAYER_GET_HEALTH'].value:
-            self.currFlash = self.flashType['hp']
-            self.tick = 10
+        if event.value == self.eventMan.evts.PLAYER_GET_HEALTH.value:
+            self.currFlash = self.flashType.hp
+            self.tick = 12
         
-        if event.value == self.eventman.evts['PLAYER_GET_PT'].value:
-            self.currFlash = self.flashType['pt']
+        if event.value == self.eventMan.evts.PLAYER_GET_PT.value:
+            self.currFlash = self.flashType.pt
+            self.tick = 12
+
+        if event.value == self.eventMan.evts.PLAYER_GET_NEW_AK.value or event.value == self.eventMan.evts.PLAYER_GET_NEW_FLY.value:
+            self.currFlash = self.flashType.new_gun
             self.tick = 10
 
-        if event.value == self.eventman.evts['PLAYER_GET_NEW_AK'].value or event.value == self.eventman.evts['PLAYER_GET_NEW_FLY'].value:
-            self.currFlash = self.flashType['new_gun']
-            self.tick = 10
-
-        if event.value == self.eventman.evts['PLAYER_DEAD'].value:
-            self.currFlash = self.flashType['dead']
+        if event.value == self.eventMan.evts.PLAYER_DEAD.value:
+            self.currFlash = self.flashType.dead

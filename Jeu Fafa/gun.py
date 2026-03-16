@@ -15,18 +15,18 @@ class Gun():
         self.tipx = 0
         self.tipy = 0
         self.angleOffset = 0
-        self.eventman = evtm
+        self.eventMan = evtm
         self.lastFireTime = -10000
         
 
     def eventGet(self, event):
-        if event.value == self.eventman.evts['PLAYER_FIRE'].value:
+        if event == self.eventMan.evts.PLAYER_FIRE:
             self.angleOffset = 20
         
-        if event.value == self.eventman.evts['PLAYER_GET_NEW_FLY'].value:
+        if event == self.eventMan.evts.PLAYER_GET_NEW_FLY:
             self.unlockedGuns = 2
             
-        if event.value == self.eventman.evts['PLAYER_GET_NEW_AK'].value:
+        if event == self.eventMan.evts.PLAYER_GET_NEW_AK:
             self.unlockedGuns = 3
 
     def update(self):
