@@ -1,6 +1,9 @@
 import pygame
-from math import ceil
+import os
 from enum import Enum
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.abspath(os.path.join(HERE, "..", "..", "..", "assets", "arcade_game"))
 
 
 class Entity(pygame.sprite.Sprite):
@@ -27,7 +30,7 @@ class Entity(pygame.sprite.Sprite):
             self.images[anim] = []
             self.images_orig[anim] = []
             for i in range(len(self.animdict[anim])):
-                self.images[anim].append(self.loadimg("Assets/jeu arcade/ennemy/" + self.animdict[anim][i]))
+                self.images[anim].append(self.loadimg(os.path.join(ASSETS_DIR, "ennemy", self.animdict[anim][i])))
                 self.images[anim][i] = pygame.transform.scale_by(self.images[anim][i], 3 if self.isStrong else 2)
                 self.images_orig[anim].append(self.images[anim][i])
         

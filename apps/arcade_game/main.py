@@ -1,5 +1,11 @@
 import pygame 
-import math
+import sys
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, 'engine'))
+sys.path.insert(0, os.path.join(HERE, 'entities'))
+
 from level import Level
 
 running = True 

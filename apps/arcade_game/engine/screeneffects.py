@@ -2,6 +2,9 @@ import pygame
 import os
 from enum import Enum
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.abspath(os.path.join(HERE, "..", "..", "..", "assets", "arcade_game"))
+
 class ScreenEffects(pygame.sprite.Sprite):
 
     def __init__(self, eventman, lvl):
@@ -16,7 +19,7 @@ class ScreenEffects(pygame.sprite.Sprite):
         self.eventMan.eventObjects.append(self)
 
         self.level = lvl
-        fontPath = os.sep.join(["Assets", "jeu arcade", "FONT.ttf"])
+        fontPath = os.path.join(ASSETS_DIR, "FONT.ttf")
         self.fontBig = pygame.font.Font(fontPath, 80)
         self.fontSmall = pygame.font.Font(fontPath, 25)
         self.isNewWave = False        

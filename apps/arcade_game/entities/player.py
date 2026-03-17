@@ -1,6 +1,11 @@
 import pygame
 import base64
-from math import ceil, atan2, cos, sin
+import os
+from math import atan2, cos
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.abspath(os.path.join(HERE, "..", "..", "..", "assets", "arcade_game"))
+
 class Player(pygame.sprite.Sprite):
     def loadimg(self, path):
         return pygame.image.load(path).convert_alpha()
@@ -27,7 +32,7 @@ class Player(pygame.sprite.Sprite):
             self.images[anim] = []
             self.images_orig[anim] = []
             for i in range(len(self.animdict[anim])):
-                self.images[anim].append(self.loadimg("Assets/jeu arcade/playerspr/" + self.animdict[anim][i]))
+                self.images[anim].append(self.loadimg(os.path.join(ASSETS_DIR, "playerspr", self.animdict[anim][i])))
                 self.images[anim][i] = pygame.transform.scale2x(self.images[anim][i])
                 self.images_orig[anim].append(self.images[anim][i])
         
@@ -49,7 +54,7 @@ class Player(pygame.sprite.Sprite):
     
     def GetScore(self):
         """Obtient le score depuis le fichier score.txt."""
-        with open("Assets/jeu arcade/score.txt", "r") as f:
+        with open(os.path.join(ASSETS_DIR, "score.txt"), "r") as f:
             txt = f.readline()
             if txt == "":
                 self.score = 0
@@ -59,7 +64,7 @@ class Player(pygame.sprite.Sprite):
     
     def PutScore(self):
         """Met le score dans le fichier score.txt."""
-        with open("Assets/jeu arcade/score.txt", "w") as f:
+        with open(os.path.join(ASSETS_DIR, "score.txt"), "w") as f:
             txt = str(self.score)
             encoded = base64.b64encode(txt.encode("ascii"))
 

@@ -1,4 +1,3 @@
-from soundmanager import SoundManager
 from enum import Enum
 
 class EventManager:

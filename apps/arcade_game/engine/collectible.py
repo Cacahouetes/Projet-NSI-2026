@@ -1,8 +1,14 @@
 import pygame
-from math import sin 
+import os
+from math import sin
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.abspath(os.path.join(HERE, "..", "..", "..", "assets", "arcade_game"))
+
+
 class Collectible(pygame.sprite.Sprite):
-    def loadimg(self, path):
-        return pygame.image.load("Assets/jeu arcade/collec/"+path).convert_alpha()
+    def loadimg(self, name):
+        return pygame.image.load(os.path.join(ASSETS_DIR, "collec", name)).convert_alpha()
 
     def __init__(self, x, y, ctype):
         pygame.sprite.Sprite.__init__(self)

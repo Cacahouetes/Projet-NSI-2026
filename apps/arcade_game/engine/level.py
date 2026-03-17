@@ -1,20 +1,30 @@
 import pygame
-import os 
+import os
+import sys
+from math import sin, cos,ceil, sqrt
+from enum import Enum
+import random
+
 from eventmanager import EventManager
 from soundmanager import SoundManager
 from screeneffects import ScreenEffects
+from tile import Tile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.abspath(os.path.join(HERE, "..", "..", "..", "assets", "arcade_game"))
+
+sys.path.insert(0, os.path.join(HERE, "..", "entities"))
 from player import Player
 from entity import Entity
 from collectible import Collectible
 from bullet import Bullet
-from tile import Tile
 from gun import Gun
-from math import sin, cos,ceil, sqrt
-from enum import Enum
 
-import random
-def loadimg(path):
-        return pygame.image.load(os.sep.join(["Assets", "jeu arcade", path])).convert_alpha()
+
+def loadimg(name):
+        return pygame.image.load(os.path.join(ASSETS_DIR, name)).convert_alpha()
+
+
 class Level():
     
     def NewGame(self):
@@ -57,7 +67,7 @@ class Level():
         self.tiles = []
         self.tiles_img = [loadimg("bg.png"), loadimg("fg.png"), loadimg("fgright.png"), loadimg("fgleft.png")]
 
-        self.readLevelFile(os.sep.join(["Jeu Fafa", "niveau.txt"]))
+        self.readLevelFile(os.sep.join([HERE, "niveau.txt"]))
         self.LoadTileTexts()
         self.LoadTileSprites()
 
@@ -72,27 +82,27 @@ class Level():
         self.NewGame()
     
     def ReadConfigFile(self):
-        with open(os.sep.join(["Assets", "jeu arcade", "game.conf"]), "r") as conf:
+        with open(os.path.join(ASSETS_DIR, "game.conf"), "r") as conf:
             self.isSoundOn = "True" in conf.readline()
 
     def WriteConfigFile(self):
-        with open(os.sep.join(["Assets", "jeu arcade", "game.conf"]), "w") as conf:
+        with open(os.path.join(ASSETS_DIR, "game.conf"), "w") as conf:
             conf.write(f"SoundOn : {self.isSoundOn}")
 
     def readLevelFile(self, path):
         """Lit le fichier texte du niveau. """
 
-        niveau = open(path, "r")
-        while True:
-            row = niveau.readline()
-            if row == "":
-                break
+        with open(path, "r") as niveau:
+            while True:
+                row = niveau.readline()
+                if row == "":
+                    break
 
-            rowlist = []
-            for tile in row:
-                if tile in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]: #si le caractère est bien un chiffre
-                    rowlist.append(int(tile))
-            self.tiles.append(rowlist)
+                rowlist = []
+                for tile in row:
+                    if tile in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]: #si le caractère est bien un chiffre
+                        rowlist.append(int(tile))
+                self.tiles.append(rowlist)
 
     def newEntity(self, xpos, isStrong):
         """Crée un nouveau ennemi."""
