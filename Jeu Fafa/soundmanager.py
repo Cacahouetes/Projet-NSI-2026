@@ -1,9 +1,10 @@
 import pygame
+import os
 from enum import Enum
 from random import randint
 def mksnd(path, vol):
     """Crée un nouveau objet son et le retourne. """
-    snd = pygame.mixer.Sound(f"Assets/jeu arcade/sfx/{path}.wav")
+    snd = pygame.mixer.Sound(os.sep.join("Assets","jeu arcade","sfx", f"{path}.wav"))
     snd.set_volume(vol)
     return snd
 
@@ -14,7 +15,11 @@ class SoundManager:
         soundfile.play()
 
     def __init__(self, eventm):
+        pygame.mixer.init()
+        
         self.eventMan = eventm
+        self.eventMan.eventObjects.append(self)
+
         self.dmgsfx = [mksnd("aie1", 0.4),mksnd("aie2", 0.4),mksnd("aie3", 0.4),mksnd("aie4", 0.4)]
         self.entdmgsfx = [mksnd("zombhurt1", 0.3),mksnd("zombhurt2", 0.3),mksnd("zombhurt3", 0.3),mksnd("zombhurt4", 0.3), mksnd("zombhurt5", 0.3)]
         
@@ -31,6 +36,13 @@ class SoundManager:
         self.wavendsfx = mksnd("new_wave", 1)
 
         self.dedsfx = mksnd("mort", 0.6)
+
+        self.PlayMusic()
+        
+    
+    def PlayMusic(self):
+        pygame.mixer.music.load(os.sep.join("Assets", "jeu arcade", "musique", "onlyvoicemusic.mp3"))
+        pygame.mixer.music.play(-1) #-1 pour mettre la musique en boucle
 
     def eventGet(self, event):
 

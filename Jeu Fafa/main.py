@@ -7,7 +7,6 @@ dt = 0.1
 
 pygame.init()
 pygame.font.init()
-pygame.mixer.init()
 font = pygame.font.SysFont('Arial', 40)
 
 win = pygame.display.set_mode((1280, 736), vsync=1)
@@ -15,9 +14,6 @@ pygame.display.set_caption("jeu nsiissininisissini")
 clock = pygame.time.Clock()
 
 level = Level()
-
-pygame.mixer.music.load('Assets/jeu arcade/musique/onlyvoicemusic.mp3')
-pygame.mixer.music.play(-1) #-1 pour mettre la musique en boucle
 
 #boucle principale du jeu
 while running:

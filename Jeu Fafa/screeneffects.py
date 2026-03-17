@@ -1,5 +1,7 @@
 import pygame
+import os
 from enum import Enum
+
 class ScreenEffects(pygame.sprite.Sprite):
 
     def __init__(self, eventman, lvl):
@@ -11,9 +13,9 @@ class ScreenEffects(pygame.sprite.Sprite):
         self.scenetick = 10000
         self.eventMan = eventman
         self.level = lvl
-
-        self.fontBig = pygame.font.Font("Assets/jeu arcade/FONT.ttf", 80)
-        self.fontSmall = pygame.font.Font("Assets/jeu arcade/FONT.ttf", 25)
+        fontPath = os.sep.join(["Assets", "jeu arcade", "FONT.ttf"])
+        self.fontBig = pygame.font.Font(fontPath, 80)
+        self.fontSmall = pygame.font.Font(fontPath, 25)
         self.isNewWave = False        
         self.flashType =  Enum('flashType', [('dmg',0),('new_gun',1), ('hp',2), ('dead', 3), ('pt', 4)])
         self.currFlash = self.flashType.dmg
@@ -58,7 +60,6 @@ class ScreenEffects(pygame.sprite.Sprite):
 
         scr = self.fontSmall.render(f"Score: {self.level.player.score}", True, (222,222,0))
         self.image.blit(scr, (1280-scr.get_width()*1.2, 60))
-
 
     def eventGet(self, event):
         if event.value == self.eventMan.evts.WAVE_END.value:

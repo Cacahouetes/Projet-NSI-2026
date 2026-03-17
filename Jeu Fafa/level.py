@@ -1,4 +1,5 @@
 import pygame
+import os 
 from eventmanager import EventManager
 from soundmanager import SoundManager
 from screeneffects import ScreenEffects
@@ -13,7 +14,7 @@ from enum import Enum
 
 import random
 def loadimg(path):
-        return pygame.image.load("Assets/jeu arcade/" + path).convert_alpha()
+        return pygame.image.load(os.sep.join(["Assets", "jeu arcade", path])).convert_alpha()
 class Level():
     
     def NewGame(self):
@@ -29,14 +30,15 @@ class Level():
 
         self.eventMan = EventManager()
         self.gun = Gun(self.eventMan)
-        self.soundman = SoundManager(self.eventMan)
+        
+        if self.isSoundOn:
+            self.soundman = SoundManager(self.eventMan)
+        
         self.player = Player(300, 150, self.eventMan)
         self.scrfx = ScreenEffects(self.eventMan, self)
         
         #relier les objets au système d'evenements pour qu'ils les captent
-        self.eventMan.eventObjects.append(self.soundman)
         self.eventMan.eventObjects.append(self.player)
-        self.eventMan.eventObjects.append(self.scrfx)
         self.eventMan.eventObjects.append(self.scrfx)
         self.eventMan.eventObjects.append(self.gun)
         self.eventMan.eventObjects.append(self)
@@ -57,12 +59,22 @@ class Level():
         self.tiles = []
         self.tiles_img = [loadimg("bg.png"), loadimg("fg.png"), loadimg("fgright.png"), loadimg("fgleft.png")]
 
-        self.readLevelFile("Jeu Fafa/niveau.txt")
+        self.readLevelFile(os.sep.join(["Jeu Fafa", "niveau.txt"]))
         self.LoadTileTexts()
         self.LoadTileSprites()
+
+        self.ReadConfigFile()
         
         self.NewGame()
     
+    def ReadConfigFile(self):
+        with open(os.sep.join(["Assets", "jeu arcade", "game.conf"]), "r") as conf:
+            self.isSoundOn = "True" in conf.readline()
+
+    def WriteConfigFile(self):
+        with open(os.sep.join(["Assets", "jeu arcade", "game.conf"]), "w") as conf:
+            conf.write(f"SoundOn : {self.isSoundOn}")
+
     def readLevelFile(self, path):
         """Lit le fichier texte du niveau. """
 

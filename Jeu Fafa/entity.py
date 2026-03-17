@@ -42,7 +42,7 @@ class Entity(pygame.sprite.Sprite):
         self.velocity = [0,0]
         self.SPEED = 0.3
         self.health = 1.75 if self.isStrong else 1.00
-
+        self.playerGaveDmg = False
         self.tick = 0
         self.r = 255
 
@@ -52,11 +52,9 @@ class Entity(pygame.sprite.Sprite):
 
     def update(self, delta, tileGroup, scroll, player):
         
-        #le code est très mauvais ici, j'aurais pu faire un state machine
         match self.state:
             case self.states.FOLLOW:
                 self.clr = (255,255,255)
-                self.tick += 1
                 plDist = self.rect.centerx - player.rect.centerx
                 
                 if self.rect.colliderect(player.rect):#abs(plDist) < 10:
@@ -64,6 +62,7 @@ class Entity(pygame.sprite.Sprite):
                     self.curranim = "hit"
                     self.animspd = 10
                     self.tick = 0
+                    self.playerGaveDmg = False
 
                 if abs(plDist) < 10:
                     self.velocity[0] = 0
@@ -78,10 +77,9 @@ class Entity(pygame.sprite.Sprite):
                 
             case self.states.ATTACK:
                 self.clr = (255,255,0)
-                if self.tick == 0 and not player.isDead:
+                if not self.playerGaveDmg and not player.isDead:
                     player.takedmg(0.1 if self.isStrong else 0.06)
-
-                self.tick += 1
+                    self.playerGaveDmg = True
 
                 if self.tick > 25:
                     self.state = self.states['FOLLOW']
@@ -93,17 +91,17 @@ class Entity(pygame.sprite.Sprite):
                 self.clr = (0,0,0)
                 self.velocity[0] = 0
                 self.velocity[1] = 0
-                self.tick += 1
+                
         
             case self.states.HURT:
                 self.clr = (255,50,50)
-                self.tick += 1
                 if self.tick > 20:
                     self.state = self.states['FOLLOW']
                     self.tick = 0
                     self.curranim = "walk"     
                     self.animspd = 6   
-        #self.image.fill(self.clr)
+
+        self.tick += 1
         self.animations()
         self.movewCollision(tileGroup, scroll, delta)
     

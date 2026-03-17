@@ -49,9 +49,11 @@ class Player(pygame.sprite.Sprite):
         """Obtient le score depuis le fichier score.txt."""
         with open("Assets/jeu arcade/score.txt", "r") as f:
             txt = f.readline()
-            encoded = base64.b64decode(txt.encode("ascii"))
-
-            self.score = int(base64.standard_b64decode(encoded).decode("ascii")) #utilisation du base 64 pour rendre la triche un peu plus difficile
+            if txt == "":
+                self.score = 0
+            else:
+                encoded = base64.b64decode(txt.encode("ascii"))
+                self.score = int(base64.standard_b64decode(encoded).decode("ascii")) #utilisation du base 64 pour rendre la triche un peu plus difficile
     
     def PutScore(self):
         """Met le score dans le fichier score.txt."""
@@ -106,7 +108,6 @@ class Player(pygame.sprite.Sprite):
                 self.currAnim = "idle"
                 self.tick = 0
                 self.animSpd = 5
-
 
         if self.currAnim == "jump" and int(self.tick / 60 * self.animSpd) >= len(self.images[self.currAnim]): #Eviter l'animation en boucle pour le saut
             animIdx = len(self.images[self.currAnim]) -1
