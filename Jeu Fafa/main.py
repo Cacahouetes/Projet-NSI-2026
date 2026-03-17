@@ -20,7 +20,6 @@ while running:
     keys = pygame.key.get_pressed()
     dt = clock.tick(60) 
     events = pygame.event.get()
-    
     for event in events:
         if event.type == pygame.QUIT:
             running = False

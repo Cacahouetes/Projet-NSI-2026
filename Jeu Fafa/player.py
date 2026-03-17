@@ -9,6 +9,8 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.eventMan = evts
+        self.eventMan.eventObjects.append(self)
+
         self.type = 1 #PLAYER
         self.health = 1.00
         self.isDead = False        
@@ -77,8 +79,7 @@ class Player(pygame.sprite.Sprite):
             
             if keys[pygame.K_UP] and not self.isJumping:
                 self.velocity[1] = 1
-                self.eventMan.broadcast(self.eventMan.evts['PLAYER_WALK_STOP'])
-                self.eventMan.broadcast(self.eventMan.evts['PLAYER_JUMP'])
+                self.eventMan.broadcast(self.eventMan.evts.PLAYER_JUMP)
                 self.isJumping = True
         else:
             self.tick = 0

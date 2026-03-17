@@ -18,40 +18,38 @@ def loadimg(path):
 class Level():
     
     def NewGame(self):
+        self.waveN = 0
+
         self.ennemy_sprites = pygame.sprite.Group()
         
         self.bullet_sprites = pygame.sprite.Group()
         self.collectible_sprites = pygame.sprite.Group()
         self.ent_draw_sprites = pygame.sprite.Group()
-        self.waveN = 0
+        
 
         self.changeTick = 0 #temps depuis le dernier changement d'état en secondes
         self.currState = self.lvlStates.NORMAL
-
-        self.eventMan = EventManager()
-        self.gun = Gun(self.eventMan)
         
-        if self.isSoundOn:
-            self.soundman = SoundManager(self.eventMan)
+        self.gun = Gun(self.eventMan)
         
         self.player = Player(300, 150, self.eventMan)
         self.scrfx = ScreenEffects(self.eventMan, self)
         
-        #relier les objets au système d'evenements pour qu'ils les captent
-        self.eventMan.eventObjects.append(self.player)
-        self.eventMan.eventObjects.append(self.scrfx)
-        self.eventMan.eventObjects.append(self.gun)
-        self.eventMan.eventObjects.append(self)
-
         self.ent_draw_sprites.add(self.player)
-
-        self.NewWave()
+        self.eventMan.broadcast(self.eventMan.evts.NEW_WAVE)
 
     def __init__(self):
 
+        self.waveN = 0
         self.TILE_SIZE = 32 
         self.scroll = pygame.math.Vector2(0,0)
         self.tile_sprites = pygame.sprite.Group()
+        self.ennemy_sprites = pygame.sprite.Group()
+        self.bullet_sprites = pygame.sprite.Group()
+        self.collectible_sprites = pygame.sprite.Group()
+        self.ent_draw_sprites = pygame.sprite.Group()
+
+        
 
         self.lvlStates = Enum('lvlState', [('NORMAL', 0), ('WAVE_END', 1),('WAVE_START', 2)])
         self.currState = self.lvlStates.NORMAL
@@ -64,7 +62,13 @@ class Level():
         self.LoadTileSprites()
 
         self.ReadConfigFile()
-        
+
+        self.eventMan = EventManager()
+        if self.isSoundOn:
+            self.soundman = SoundManager(self.eventMan)
+        #relier les objets au système d'evenements pour qu'ils les captent
+        self.eventMan.eventObjects.append(self)
+
         self.NewGame()
     
     def ReadConfigFile(self):

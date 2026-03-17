@@ -17,6 +17,8 @@ class Gun():
         self.angleOffset = 0
         self.eventMan = evtm
         self.lastFireTime = -10000
+
+        self.eventMan.eventObjects.append(self)
         
 
     def eventGet(self, event):

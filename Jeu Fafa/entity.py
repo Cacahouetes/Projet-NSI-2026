@@ -107,8 +107,8 @@ class Entity(pygame.sprite.Sprite):
     
     def movewCollision(self, tileGroup, scroll, delta):
         if self.posY > 1000:
-            self.posY = -200
-        
+            self.posY = 200
+
         self.rect.x = self.posX - scroll.x
         self.rect.y = self.posY - scroll.y
 

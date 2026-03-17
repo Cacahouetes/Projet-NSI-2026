@@ -11,7 +11,10 @@ class ScreenEffects(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.tick = 100
         self.scenetick = 10000
+
         self.eventMan = eventman
+        self.eventMan.eventObjects.append(self)
+
         self.level = lvl
         fontPath = os.sep.join(["Assets", "jeu arcade", "FONT.ttf"])
         self.fontBig = pygame.font.Font(fontPath, 80)
