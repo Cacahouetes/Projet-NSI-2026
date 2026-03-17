@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Dex — Card Opening Simulator</title>
+
+    <!--
+        POLICES 
+         Syne  → titres, labels, badges de rareté
+         Inter → texte courant, noms de cartes, filtres
+     -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!--
+        ICÔNES
+         Line Awesome — utilisé ici pour :
+         - <i class="las la-search"> → icône loupe dans la barre de recherche
+         - <i class="las la-times">  → icône croix de fermeture du modal
+     -->
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"/>
+
+    <!--
+        FEUILLES DE STYLE
+         style_1.css : styles partagés (header, footer, nav, variables CSS)
+         style_2.css : styles propres au Card Dex uniquement
+                       (barre de recherche, grille de cartes, modal)
+     -->
+    <link rel="stylesheet" href="/static/style_1.css">
+    <link rel="stylesheet" href="/static/style_2.css">
+</head>
+<body>
+
+<!-- 
+     HEADER
+     Identique sur toutes les pages.
+     "active" est placé sur "Card Dex" pour indiquer la page courante.
+ -->
+<header>
+    <div class="header-inner">
+        <a href="/" class="logo">
+            <div class="logo-dot"></div>
+            Card Opening Simulator
+        </a>
+        <nav>
+            <ul>
+                <li><a href="/accueil">Accueil</a></li>
+                <li class="active"><a href="/carddex">Card Dex</a></li>
+                <li><a href="/stats">Statistiques</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+<!-- 
+     EN-TÊTE DE PAGE
+ -->
+<div class="page-header">
+    <div class="page-header-inner">
+        <h1>Card Dex</h1>
+        <p class="page-subtitle">Explorez les 756 cartes de la collection</p>
+    </div>
+</div>
+
+
+<!-- 
+     ZONE PRINCIPALE DU CARD DEX
+ -->
+<div class="dex-container">
+
+    <!--
+        Barre de recherche et filtres 
+         #searchInput    : champ de saisie libre (filtrage par nom ou ID).
+         #rarityFilter   : filtre sur la colonne "rarity" de CARDS.
+         #categoryFilter : filtre sur la colonne "category" de CARDS.
+     -->
+    <div class="search-bar">
+        <i class="las la-search search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher une carte par nom ou ID...">
+        <div class="filter-group">
+            <select id="rarityFilter">
+                <option value="">Toutes les raretés</option>
+                <option value="Commune">Commune</option>
+                <option value="Rare">Rare</option>
+                <option value="Épique">Épique</option>
+                <option value="Légendaire">Légendaire</option>
+                <option value="Mythique">Mythique</option>
+                <option value="Unique">Unique</option>
+                <option value="Divine">Divine</option>
+            </select>
+            <select id="categoryFilter">
+                <option value="">Toutes les catégories</option>
+                <option value="MEME">Mème</option>
+                <option value="MOTS">Mots</option>
+                <option value="OBJETS">Objets</option>
+                <option value="PERSONNAGES">Personnages</option>
+                <option value="CONCEPTS">Concepts</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Compteur de résultats mis à jour en temps réel par displayCards() -->
+    <div class="results-info" id="resultsInfo"></div>
+
+    <!-- Grille de cartes — remplie dynamiquement par JavaScript -->
+    <div class="cards-grid" id="cardsGrid">
+        <div class="no-results">Chargement des cartes...</div>
+    </div>
+
+</div>
+
+
+<!-- 
+     MODAL DE DÉTAIL D'UNE CARTE
+     .modal-overlay : fond semi-transparent — clic dessus = fermeture.
+     .modal-card    : boîte centrée — stopPropagation évite la fermeture
+                      accidentelle au clic sur la carte elle-même.
+     La classe "open" contrôle la visibilité.
+ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()">
+            <i class="las la-times"></i>
+        </button>
+        <img id="modalImage" src="" alt="">
+        <div class="modal-info">
+            <div class="modal-name" id="modalName"></div>
+            <div class="modal-meta" id="modalMeta"></div>
+        </div>
+    </div>
+</div>
+
+
+<!--
+     FOOTER
+ -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-left">
+            Réalisé par <strong>Augustin</strong>, <strong>Tristan</strong>, <strong>Thyraël</strong> & <strong>Fafa</strong> — Projet NSI Terminale
+        </div>
+        <div class="footer-right">© 2026 Card Opening Simulator — Tous droits réservés</div>
+    </div>
+</footer>
+
+
+<!-- 
+     JAVASCRIPT
+ -->
+<script>
+    // Stocke toutes les cartes reçues du serveur pour filtrer côté client
+    // sans refaire de requête réseau à chaque frappe.
+    let allCards = [];
+
+
+    // loadCards()
+    // Appelle la route Flask /api/cards qui lit la table CARDS dans SQLite
+    // et la renvoie en JSON. Plus besoin de database.json.
+    //
+    // Normalisation des données reçues :
+    //   card_id    → id        (pour la recherche par ID dans applyFilters)
+    //   image_path → image     (chemin complet servi par Flask via /cards/)
+    async function loadCards() {
+        const grid = document.getElementById('cardsGrid');
+        try {
+            const response = await fetch('/api/cards'); // requête GET vers Flask
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            allCards = await response.json();
+
+            // Normalisation pour que le reste du code fonctionne
+            allCards = allCards.map(c => ({
+                ...c,
+                id:    c.card_id,
+                image: '/cards/' + c.image_path.replace('Cards/', '')
+            }));
+
+            // Tri par ordre de rareté (de la plus rare à la plus commune).
+            // RARITY_ORDER associe chaque rareté à un rang numérique.
+            // .sort() compare deux cartes a et b : si a est plus rare que b
+            // (rang plus petit), elle passe avant. À rang égal, on trie par
+            // nom alphabétique pour un affichage stable et prévisible.
+            const RARITY_ORDER = {
+                'Commune':     1,
+                'Rare':     2,
+                'Épique':   3,
+                'Légendaire': 4,
+                'Mythique':     5,
+                'Unique':       6,
+                'Divine':    7
+            };
+            allCards.sort((a, b) => {
+                const rankA = RARITY_ORDER[a.rarity] ?? 99;
+                const rankB = RARITY_ORDER[b.rarity] ?? 99;
+                if (rankA !== rankB) return rankA - rankB;
+                return a.name.localeCompare(b.name, 'fr');
+            });
+
+            applyFilters(); // affiche toutes les cartes au démarrage
+        } catch (error) {
+            grid.innerHTML = '<div class="no-results">Impossible de charger les cartes depuis /api/cards — vérifiez que Flask tourne.</div>';
+            console.error("Erreur de chargement :", error);
+        }
+    }
+
+
+    // getRarityClass(rarity)
+    // Convertit le nom d'une rareté en classe CSS colorée.
+    // Ces classes sont définies dans style_1.css et style_2.css.
+    function getRarityClass(rarity) {
+        const map = {
+            'Commune':    'r-commune',
+            'Rare':       'r-rare',
+            'Épique':     'r-epique',
+            'Légendaire': 'r-legend',
+            'Mythique':   'r-mythique',
+            'Unique':     'r-unique',
+            'Divine':     'r-divine'
+        };
+        return map[rarity] || '';
+    }
+
+
+    // displayCards(cards)
+    // Prend un tableau de cartes filtré et génère le HTML de la grille.
+    // loading="lazy" : les images hors écran ne sont téléchargées que
+    // quand l'utilisateur scrolle jusqu'à elles.
+    function displayCards(cards) {
+        const grid = document.getElementById('cardsGrid');
+        const info = document.getElementById('resultsInfo');
+
+        info.textContent = `${cards.length} carte${cards.length !== 1 ? 's' : ''} trouvée${cards.length !== 1 ? 's' : ''}`;
+
+        if (cards.length === 0) {
+            grid.innerHTML = '<div class="no-results">Aucune carte trouvée</div>';
+            return;
+        }
+
+        grid.innerHTML = cards.map(card => `
+            <div class="dex-card" onclick="openModal('${card.image}', '${card.name.replace(/'/g, "\\'")}', '${card.rarity || ''}', '${card.category || ''}')">
+                <div class="dex-card-img-wrap">
+                    <img src="${card.image}" alt="${card.name}" loading="lazy"
+                         onerror="this.style.opacity='0.2'">
+                </div>
+                <div class="dex-card-info">
+                    <div class="dex-card-name">${card.name}</div>
+                    ${card.rarity ? `<span class="dex-card-rarity ${getRarityClass(card.rarity)}">${card.rarity}</span>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+
+    // applyFilters()
+    // Lit les 3 contrôles et filtre allCards avec .filter().
+    // Les catégories en base sont en MAJUSCULES (MEME, MOTS…),
+    // on compare donc en majuscules des deux côtés.
+    function applyFilters() {
+        const term     = document.getElementById('searchInput').value.toLowerCase();
+        const rarity   = document.getElementById('rarityFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+
+        const filtered = allCards.filter(card => {
+            const matchSearch   = card.name.toLowerCase().includes(term)
+                               || card.id?.toString().includes(term);
+            const matchRarity   = !rarity   || card.rarity   === rarity;
+            const matchCategory = !category || card.category === category;
+            return matchSearch && matchRarity && matchCategory;
+        });
+
+        displayCards(filtered);
+    }
+
+
+    // openModal()
+    // Remplit le modal avec les infos de la carte cliquée et l'affiche.
+    function openModal(img, name, rarity, category) {
+        document.getElementById('modalImage').src = img;
+        document.getElementById('modalName').textContent = name;
+        document.getElementById('modalMeta').innerHTML =
+            `${rarity   ? `<span class="dex-card-rarity ${getRarityClass(rarity)}">${rarity}</span>`   : ''}
+             ${category ? `<span class="modal-category">${category}</span>`                             : ''}`;
+        document.getElementById('modalOverlay').classList.add('open');
+    }
+
+
+    // closeModal()
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+
+    // Écouteurs d'événements
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('rarityFilter').addEventListener('change', applyFilters);
+    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // Chargement initial dès que la page est prête
+    window.onload = loadCards;
+</script>
+
+</body>
+</html>
