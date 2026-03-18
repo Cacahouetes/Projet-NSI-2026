@@ -1,10 +1,15 @@
 import pygame
-import base64
+import sqlite3
 import os
 from math import atan2, cos
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.abspath(os.path.join(HERE, "..", "..", "..", "assets", "arcade_game"))
+
+DB_PATH = os.path.abspath(os.path.join(HERE, "..", "..", "..", "data", "game.db"))
+PLAYER_ID = 1
+RARITIES = ["Commune", "Rare", "Épique", "Légendaire", "Mythique", "Unique", "Divine"]
+
 
 class Player(pygame.sprite.Sprite):
     def loadimg(self, path):
@@ -53,22 +58,58 @@ class Player(pygame.sprite.Sprite):
         self.GetScore()
     
     def GetScore(self):
-        """Obtient le score depuis le fichier score.txt."""
-        with open(os.path.join(ASSETS_DIR, "score.txt"), "r") as f:
-            txt = f.readline()
-            if txt == "":
-                self.score = 0
-            else:
-                encoded = base64.b64decode(txt.encode("ascii"))
-                self.score = int(base64.standard_b64decode(encoded).decode("ascii")) #utilisation du base 64 pour rendre la triche un peu plus difficile
+        """
+        Lit les pièces depuis la DB.
+        Si aucun joueur n'existe, en crée un automatiquement.
+        """
+        import time as _time
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+ 
+                cur.execute("SELECT player_id FROM PLAYERS ORDER BY player_id LIMIT 1")
+                row = cur.fetchone()
+ 
+                if row is None:
+                    # Aucun joueur, création automatique
+                    cur.execute(
+                        "INSERT INTO PLAYERS (username, created_at) VALUES (?, ?)",
+                        ("Joueur", int(_time.time()))
+                    )
+                    new_id = cur.lastrowid
+                    cur.execute("INSERT INTO PLAYER_STATS (player_id) VALUES (?)", (new_id,))
+                    for rarity in RARITIES:
+                        cur.execute("""
+                            INSERT INTO PLAYER_RARITY_STATS (player_id, rarity, obtained, sold, fused)
+                            VALUES (?, ?, 0, 0, 0)
+                        """, (new_id, rarity))
+                    conn.commit()
+                    self.score = 0
+                else:
+                    cur.execute("SELECT coins FROM PLAYER_STATS WHERE player_id=?",
+                                (row["player_id"],))
+                    stat = cur.fetchone()
+                    self.score = stat["coins"] if stat else 0
+ 
+        except Exception:
+            self.score = 0
     
     def PutScore(self):
-        """Met le score dans le fichier score.txt."""
-        with open(os.path.join(ASSETS_DIR, "score.txt"), "w") as f:
-            txt = str(self.score)
-            encoded = base64.b64encode(txt.encode("ascii"))
-
-            f.write(base64.standard_b64encode(encoded).decode("ascii"))
+        """Ajoute 1 pièce dans la base de données (1 point = 1 pièce)."""
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                cur = conn.cursor()
+                cur.execute("""
+                    UPDATE PLAYER_STATS
+                    SET coins        = coins + 10,
+                        coins_earned = coins_earned + 10,
+                        max_coins_held = MAX(max_coins_held, coins + 10)
+                    WHERE player_id = ?
+                """, (PLAYER_ID,))
+                conn.commit()
+        except Exception:
+            pass
 
     def update(self, delta, tileGroup, scroll):
         self.velXBefore = abs(self.velocity[0])

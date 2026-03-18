@@ -16,7 +16,7 @@ pygame.font.init()
 font = pygame.font.SysFont('Arial', 40)
 
 win = pygame.display.set_mode((1280, 736), vsync=1)
-pygame.display.set_caption("jeu nsiissininisissini")
+pygame.display.set_caption("Arcade Game")
 clock = pygame.time.Clock()
 
 level = Level()
@@ -30,12 +30,18 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            running = False
+
     win.fill((60,48,39))
     level.update(dt, events)
     level.draw(win)
 
     pygame.display.flip()
+
 pygame.quit()
+sys.exit(0)
 
 """
 change_gun.wav
