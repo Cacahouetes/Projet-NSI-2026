@@ -1,4 +1,4 @@
-# Card Opening Simulator — Trophées NSI 2026
+# Card Opening Simulator - Trophées NSI 2026
 
 ## Prérequis
 
