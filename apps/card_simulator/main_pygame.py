@@ -26,9 +26,11 @@ def main():
     def patched_run():
         manager._running = True
         clock = manager._clock
+        session_ms = 0
 
         while manager._running:
-            dt     = clock.tick(manager.FPS)
+            dt = clock.tick(manager.FPS)
+            session_ms += dt
             events = pygame.event.get()
 
             for e in events:
@@ -68,8 +70,7 @@ def main():
         if manager.player and manager.player.id is not None:
             try:
                 import database_manager as db
-                db.db_update_play_time(manager.player.id,
-                                       int(clock.get_time() / 1000))
+                db.db_update_play_time(manager.player.id, session_ms // 1000)
             except Exception:
                 pass
 
