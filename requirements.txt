@@ -1,0 +1,6 @@
+# requirements.txt — Card Opening Simulator
+# Trophées NSI 2026
+# Installation : pip install -r requirements.txt
+
+pygame>=2.5.0
+flask>=3.0.0
