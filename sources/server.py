@@ -1,5 +1,5 @@
 #Projet : Card Opening Simulator
-#Auteurs : Fafa, Thyraël, Tristan, Augustin
+#Auteurs : Fahreddin, Thyraël, Tristan, Augustin
 
 """
 server.py

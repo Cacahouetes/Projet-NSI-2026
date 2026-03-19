@@ -1,8 +1,5 @@
-#Projet : Card Opening Simulator
-#Auteurs : Fafa, Thyraël, Tristan, Augustin
-
 """
-main.py
+launcher.py — NSI 2026
 Lance Card Simulator, Arcade Game et WebStats.
 Inclut un reset de sauvegarde avec popup de confirmation.
 """
@@ -17,10 +14,10 @@ import sqlite3
 
 # Chemins
 HERE        = os.path.dirname(os.path.abspath(__file__))
-CARD_MAIN   = os.path.join(HERE, *["apps", "card_simulator", "main_pygame.py"])
-ARCADE_MAIN = os.path.join(HERE, *["apps", "arcade_game",    "main.py"])
+CARD_MAIN   = os.path.join(HERE, "apps", "card_simulator",  "main_pygame.py")
+ARCADE_MAIN = os.path.join(HERE, "apps", "arcade_game",     "main.py")
 SERVER_PY   = os.path.join(HERE, "server.py")
-DB_PATH     = os.path.join(HERE, *["data", "game.db"])
+DB_PATH     = os.path.join(HERE, "data", "game.db")
 SERVER_URL  = "http://localhost:5000"
 
 # Palette
@@ -49,7 +46,10 @@ def _db_connect():
 
 
 def db_get_save_info() -> dict | None:
-    """Résumé de la sauvegarde du premier joueur actif."""
+    """
+    Résumé de la sauvegarde du premier joueur actif.
+    Retourne None si aucun joueur n'existe (DB vierge).
+    """
     try:
         conn = _db_connect()
         cur  = conn.cursor()
@@ -59,14 +59,16 @@ def db_get_save_info() -> dict | None:
             conn.close()
             return None
         pid = row["player_id"]
-        cur.execute("SELECT coins, coins_earned, chests_opened FROM PLAYER_STATS WHERE player_id=?", (pid,))
+        cur.execute("""SELECT coins, coins_earned, chests_opened, cards_obtained
+                       FROM PLAYER_STATS WHERE player_id=?""", (pid,))
         stats = cur.fetchone()
         cur.execute("SELECT COUNT(*) FROM PLAYER_CARDS   WHERE player_id=?", (pid,))
         cards = cur.fetchone()[0]
         cur.execute("SELECT COUNT(*) FROM PLAYER_CARDDEX WHERE player_id=?", (pid,))
         carddex = cur.fetchone()[0]
-        coins_earned = stats["coins_earned"] if stats else 0
-        chests       = stats["chests_opened"] if stats else 0
+        coins_earned   = stats["coins_earned"]   if stats else 0
+        chests         = stats["chests_opened"]  if stats else 0
+        cards_obtained = stats["cards_obtained"] if stats else 0
         conn.close()
         return {
             "player_id":  pid,
@@ -76,44 +78,80 @@ def db_get_save_info() -> dict | None:
             "cards":      cards,
             "carddex":    carddex,
             "chests":     chests,
-            "is_empty":   (cards == 0 and coins_earned == 0 and chests == 0),
+            "is_empty":   (cards_obtained == 0 and coins_earned == 0 and chests == 0),
         }
     except Exception as e:
         print(f"[db_get_save_info] {e}")
         return None
 
 
-def db_reset_player(player_id: int) -> bool:
-    """Reset complet de la progression du joueur."""
+def db_reset_and_recreate(old_player_id: int, new_username: str) -> bool:
+    """
+    Supprime entièrement le joueur et toute sa progression, puis crée
+    un nouveau joueur avec new_username.
+
+    1. Supprime toutes les tables joueur (données de progression)
+    2. Supprime la ligne PLAYERS + PLAYER_STATS de l'ancien joueur
+    3. Vide les tables de session jeu (CHESTS, CHEST_CARDS, SHOP_CARDS)
+    4. Remet sqlite_sequence à l'état initial :
+          CARDS=756 (card_id restent cohérents), tout le reste=0
+    5. Crée un nouveau joueur avec new_username (id repart de 1)
+       + sa ligne PLAYER_STATS vide + ses 7 lignes PLAYER_RARITY_STATS
+
+    Tables NON touchées : CARDS, ACHIEVEMENTS, DAILY_REWARDS
+    """
+    RARITIES = ["Commune", "Rare", "\u00c9pique", "L\u00e9gendaire", "Mythique", "Unique", "Divine"]
+
     try:
         conn = _db_connect()
         cur  = conn.cursor()
-        cur.execute("SELECT 1 FROM PLAYERS WHERE player_id=?", (player_id,))
-        if not cur.fetchone():
-            conn.close()
-            return False
+
         with conn:
-            for table in ["PLAYER_CARDS", "PLAYER_CARDDEX", "PLAYER_ACHIEVEMENTS",
-                          "PLAYER_FUSIONS", "PLAYER_RARITY_STATS",
-                          "CHEST_OPENINGS", "DAILY_HISTORY", "SHOP_HISTORY"]:
-                cur.execute(f"DELETE FROM {table} WHERE player_id=?", (player_id,))
-            cur.execute("""DELETE FROM PLAYER_FUSIONS_CARDS
-                           WHERE fusion_id NOT IN (SELECT fusion_id FROM PLAYER_FUSIONS)""")
+            # Tables joueur (progression)
+            for table in [
+                "PLAYER_CARDS", "PLAYER_CARDDEX", "PLAYER_ACHIEVEMENTS",
+                "PLAYER_FUSIONS", "PLAYER_RARITY_STATS",
+                "CHEST_OPENINGS", "DAILY_HISTORY", "SHOP_HISTORY",
+            ]:
+                cur.execute(f"DELETE FROM {table} WHERE player_id=?", (old_player_id,))
+
+            # PLAYER_FUSION_CARDS : liée via fusion_id (pas player_id direct)
             cur.execute("""
-                UPDATE PLAYER_STATS SET
-                    last_daily_timestamp=0, daily_current_streak=0,
-                    daily_best_streak=0,    daily_streak_breaks=0,
-                    coins=0,                coins_earned=0,
-                    coins_spent=0,          max_coins_held=0,
-                    play_time_seconds=0
-                WHERE player_id=?
-            """, (player_id,))
+                DELETE FROM PLAYER_FUSION_CARDS
+                WHERE fusion_id NOT IN (SELECT fusion_id FROM PLAYER_FUSIONS)
+            """)
+
+            # Suppression du compte joueur
+            cur.execute("DELETE FROM PLAYER_STATS WHERE player_id=?", (old_player_id,))
+            cur.execute("DELETE FROM PLAYERS      WHERE player_id=?", (old_player_id,))
+
+            # Tables de session jeu (recréées au prochain démarrage)
+            cur.execute("DELETE FROM CHESTS")
+            cur.execute("DELETE FROM CHEST_CARDS")
+            cur.execute("DELETE FROM SHOP_CARDS")
+
+            # Reset sqlite_sequence : CARDS reste à 756, tout le reste à 0
+            cur.execute("UPDATE sqlite_sequence SET seq=0   WHERE name != 'CARDS'")
+            cur.execute("UPDATE sqlite_sequence SET seq=756 WHERE name  = 'CARDS'")
+
+            # Nouveau joueur (id repart de 1)
+            cur.execute(
+                "INSERT INTO PLAYERS (username, created_at) VALUES (?, ?)",
+                (new_username, int(time.time()))
+            )
+            new_id = cur.lastrowid
+            cur.execute("INSERT INTO PLAYER_STATS (player_id) VALUES (?)", (new_id,))
+            for rarity in RARITIES:
+                cur.execute("""
+                    INSERT INTO PLAYER_RARITY_STATS (player_id, rarity, obtained, sold, fused)
+                    VALUES (?, ?, 0, 0, 0)
+                """, (new_id, rarity))
+
         conn.close()
         return True
     except Exception as e:
-        print(f"[db_reset_player] {e}")
+        print(f"[db_reset_and_recreate] {e}")
         return False
-
 
 # Serveur Flask
 
@@ -181,7 +219,7 @@ class Button:
 # Popup reset
 
 class ResetPopup:
-    PW, PH = 460, 290
+    PW, PH = 480, 340
 
     def __init__(self, fonts):
         self.f_title = fonts["title"]
@@ -191,6 +229,11 @@ class ResetPopup:
         self.state   = "confirm"   # 'confirm' | 'empty' | 'done'
         self._save   = None
         self._timer  = 0
+
+        # Champ texte pour le nouveau nom du joueur
+        self._input_text   = "Joueur"
+        self._input_active = False
+        self._cursor_tick  = 0
 
         px = (W - self.PW) // 2
         py = (H - self.PH) // 2
@@ -214,26 +257,46 @@ class ResetPopup:
         if self._save is None or self._save["is_empty"]:
             self.state = "empty"
         else:
-            self.state = "confirm"
-        self.visible = True
-        self._timer  = 0
+            self.state         = "confirm"
+            self._input_text   = self._save["username"]
+        self.visible       = True
+        self._timer        = 0
+        self._input_active = False
 
     def close(self):
         self.visible = False
 
     def _do_reset(self):
         if self._save:
-            ok = db_reset_player(self._save["player_id"])
-            self.state = "done" if ok else "empty"
+            username = self._input_text.strip() or "Joueur"
+            ok = db_reset_and_recreate(self._save["player_id"], username)
+            self.state  = "done" if ok else "empty"
             self._timer = 0
 
     def handle_event(self, e):
         if not self.visible:
             return
         if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-            self.close()
+            if self._input_active:
+                self._input_active = False
+            else:
+                self.close()
             return
         if self.state == "confirm":
+            # Clic sur le champ texte → active la saisie
+            if e.type == pygame.MOUSEBUTTONUP and e.button == 1:
+                px = (W - self.PW) // 2
+                py = (H - self.PH) // 2
+                input_rect = pygame.Rect(px + 130, py + 208, self.PW - 154, 34)
+                self._input_active = input_rect.collidepoint(e.pos)
+            # Saisie clavier
+            if e.type == pygame.KEYDOWN and self._input_active:
+                if e.key == pygame.K_BACKSPACE:
+                    self._input_text = self._input_text[:-1]
+                elif e.key in (pygame.K_RETURN, pygame.K_TAB):
+                    self._input_active = False
+                elif len(self._input_text) < 20 and e.unicode.isprintable():
+                    self._input_text += e.unicode
             self._btn_confirm.handle_event(e)
             self._btn_cancel.handle_event(e)
         else:
@@ -244,6 +307,8 @@ class ResetPopup:
             self._timer += dt
             if self._timer > 2200:
                 self.close()
+        if self._input_active:
+            self._cursor_tick += dt
 
     def draw(self, surf):
         if not self.visible:
@@ -262,14 +327,17 @@ class ResetPopup:
 
     def _draw_confirm(self, surf, px, py):
         s = self._save
+
+        # Titre
         t = self.f_title.render("Effacer la sauvegarde ?", True, RED)
         surf.blit(t, t.get_rect(centerx=px + self.PW // 2, y=py + 16))
         pygame.draw.line(surf, BORDER, (px + 18, py + 48), (px + self.PW - 18, py + 48), 1)
 
+        # Résumé save
         import time as _t
         created = _t.strftime("%d/%m/%Y", _t.localtime(s["created_at"])) if s["created_at"] else "?"
         lines = [
-            f"Joueur   :  {s['username']}   (compte créé le {created})",
+            f"Joueur   :  {s['username']}   (créé le {created})",
             f"Pièces   :  {s['coins']}",
             f"Cartes   :  {s['cards']}  —  CardDex : {s['carddex']} / 756",
             f"Coffres  :  {s['chests']}",
@@ -278,10 +346,29 @@ class ResetPopup:
             c = TEXT_M if i > 0 else TEXT_W
             surf.blit(self.f_body.render(line, True, c), (px + 24, py + 60 + i * 24))
 
-        warn = self.f_small.render("Cette action est irréversible — le compte reste créé.", True, (210, 80, 80))
-        surf.blit(warn, warn.get_rect(centerx=px + self.PW // 2, y=py + 172))
+        warn = self.f_small.render("Cette action est irréversible.", True, (210, 80, 80))
+        surf.blit(warn, warn.get_rect(centerx=px + self.PW // 2, y=py + 162))
 
-        pygame.draw.line(surf, BORDER, (px + 18, py + 198), (px + self.PW - 18, py + 198), 1)
+        # Séparateur + champ nouveau nom
+        pygame.draw.line(surf, BORDER, (px + 18, py + 184), (px + self.PW - 18, py + 184), 1)
+
+        lbl = self.f_body.render("Nouveau nom :", True, TEXT_M)
+        surf.blit(lbl, (px + 24, py + 196))
+
+        input_rect = pygame.Rect(px + 130, py + 192, self.PW - 154, 32)
+        border_col = GOLD if self._input_active else BORDER
+        draw_rrect(surf, (30, 34, 55), input_rect, r=6, border=border_col, bw=1)
+
+        display = self._input_text
+        if self._input_active and (self._cursor_tick // 500) % 2 == 0:
+            display += "|"
+        t_inp = self.f_body.render(display, True, TEXT_W)
+        surf.blit(t_inp, (input_rect.x + 8, input_rect.y + 7))
+
+        hint = self.f_small.render("Clique sur le champ pour saisir", True, TEXT_D)
+        surf.blit(hint, hint.get_rect(centerx=px + self.PW // 2, y=py + 228))
+
+        pygame.draw.line(surf, BORDER, (px + 18, py + 248), (px + self.PW - 18, py + 248), 1)
         self._btn_confirm.draw(surf)
         self._btn_cancel.draw(surf)
 
@@ -295,8 +382,11 @@ class ResetPopup:
     def _draw_done(self, surf, px, py):
         t1 = self.f_title.render("Sauvegarde effacée !", True, GREEN)
         surf.blit(t1, t1.get_rect(centerx=px + self.PW // 2, y=py + 75))
-        t2 = self.f_body.render("Prêt pour une nouvelle partie.", True, TEXT_M)
-        surf.blit(t2, t2.get_rect(centerx=px + self.PW // 2, y=py + 120))
+        username = self._input_text.strip() or "Joueur"
+        t2 = self.f_body.render(f"Nouveau joueur : {username}", True, GOLD)
+        surf.blit(t2, t2.get_rect(centerx=px + self.PW // 2, y=py + 112))
+        t3 = self.f_body.render("Prêt pour une nouvelle partie !", True, TEXT_M)
+        surf.blit(t3, t3.get_rect(centerx=px + self.PW // 2, y=py + 140))
         # Barre de fermeture auto
         ratio = min(1.0, self._timer / 2200)
         bw    = int((self.PW - 60) * ratio)
@@ -354,10 +444,8 @@ def main():
                         "Ouvrir", fonts["body"], GREEN)
     btn_reset  = Button((20, H-48, 210, 32), "Effacer la sauvegarde",
                         fonts["small"], (60, 28, 28), radius=8)
-    _quit = [False]  # conteneur mutable pour la closure
-    btn_quit = Button((W-130, H-48, 110, 32), "Quitter",
-                      fonts["small"], RED, radius=8,
-                      on_click=lambda: _quit.__setitem__(0, True))
+    btn_quit   = Button((W-130, H-48, 110, 32), "Quitter",
+                        fonts["small"], RED, radius=8)
 
     popup = ResetPopup(fonts)
 
